@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">RobotRemote</string>
+    <string name="left_arrow">left arrow</string>
+    <string name="up_arrow">up arrow</string>
+    <string name="right_arrow">right arrow</string>
+    <string name="down_arrow">down arrow</string>
+    <string name="connection_state_unknown">وضعیت اتصال: نامعلوم</string>
+    <string name="connection_state_connected">وضعیت اتصال: متصل</string>
+    <string name="connection_state_problem">وضعیت اتصال: اختلال</string>
+    <string name="one_shot_gun">تفنگ تک تیر</string>
+    <string name="rapid_gun">تفنگ رگبار</string>
+    <string name="toggle_gun">تفنگ ثابت</string>
+</resources>
