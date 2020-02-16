@@ -26,11 +26,13 @@ class MainActivity : AppCompatActivity() {
             //change the color of arrow when they are on hold by user
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
+                    disableEnableOtherViews("left", "disable")
                     val jsonObj = JSONObject("{\"token\":\"MatarataSecretToken1994\",\"request\":\"left\",\"state\":\"on\"}")
                     volleyJsonReqArrows(jsonObj, "left")
                     ma_iv_left.setColorFilter(ContextCompat.getColor(this, R.color.colorAccent), android.graphics.PorterDuff.Mode.MULTIPLY)
                 }
                 MotionEvent.ACTION_UP -> {
+                    disableEnableOtherViews("left", "enable")
                     val jsonObj = JSONObject("{\"token\":\"MatarataSecretToken1994\",\"request\":\"left\",\"state\":\"off\"}")
                     volleyJsonReqArrows(jsonObj, "left")
                     ma_iv_left.colorFilter = null
@@ -42,11 +44,13 @@ class MainActivity : AppCompatActivity() {
             //change the color of arrow when they are on hold by user
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
+                    disableEnableOtherViews("right", "disable")
                     val jsonObj = JSONObject("{\"token\":\"MatarataSecretToken1994\",\"request\":\"right\",\"state\":\"on\"}")
                     volleyJsonReqArrows(jsonObj, "right")
                     ma_iv_right.setColorFilter(ContextCompat.getColor(this, R.color.colorAccent), android.graphics.PorterDuff.Mode.MULTIPLY)
                 }
                 MotionEvent.ACTION_UP -> {
+                    disableEnableOtherViews("right", "enable")
                     val jsonObj = JSONObject("{\"token\":\"MatarataSecretToken1994\",\"request\":\"right\",\"state\":\"off\"}")
                     volleyJsonReqArrows(jsonObj, "right")
                     ma_iv_right.colorFilter = null
@@ -58,11 +62,13 @@ class MainActivity : AppCompatActivity() {
             //change the color of arrow when they are on hold by user
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
+                    disableEnableOtherViews("forward", "disable")
                     val jsonObj = JSONObject("{\"token\":\"MatarataSecretToken1994\",\"request\":\"forward\",\"state\":\"on\"}")
                     volleyJsonReqArrows(jsonObj, "forward")
                     ma_iv_up.setColorFilter(ContextCompat.getColor(this, R.color.colorAccent), android.graphics.PorterDuff.Mode.MULTIPLY)
                 }
                 MotionEvent.ACTION_UP -> {
+                    disableEnableOtherViews("forward", "enable")
                     val jsonObj = JSONObject("{\"token\":\"MatarataSecretToken1994\",\"request\":\"forward\",\"state\":\"off\"}")
                     volleyJsonReqArrows(jsonObj, "forward")
                     ma_iv_up.colorFilter = null
@@ -73,11 +79,13 @@ class MainActivity : AppCompatActivity() {
         ma_iv_down.setOnTouchListener { _, event ->
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
+                    disableEnableOtherViews("backward", "disable")
                     val jsonObj = JSONObject("{\"token\":\"MatarataSecretToken1994\",\"request\":\"backward\",\"state\":\"on\"}")
                     volleyJsonReqArrows(jsonObj, "backward")
                     ma_iv_down.setColorFilter(ContextCompat.getColor(this, R.color.colorAccent), android.graphics.PorterDuff.Mode.MULTIPLY)
                 }
                 MotionEvent.ACTION_UP -> {
+                    disableEnableOtherViews("backward", "enable")
                     val jsonObj = JSONObject("{\"token\":\"MatarataSecretToken1994\",\"request\":\"backward\",\"state\":\"off\"}")
                     volleyJsonReqArrows(jsonObj, "backward")
                     ma_iv_down.colorFilter = null
@@ -273,6 +281,55 @@ class MainActivity : AppCompatActivity() {
             0.7F
         )
         requestQueue.add(jsonObjectRequest)
+    }
+
+    private fun disableEnableOtherViews(view: String, state: String){
+        when(view){
+            "left" -> {
+                if(state == "disable"){
+                    ma_iv_right.isEnabled = false
+                    ma_iv_up.isEnabled = false
+                    ma_iv_down.isEnabled = false
+                }else if(state == "enable"){
+                    ma_iv_right.isEnabled = true
+                    ma_iv_up.isEnabled = true
+                    ma_iv_down.isEnabled = true
+                }
+            }
+            "right" -> {
+                if(state == "disable"){
+                    ma_iv_left.isEnabled = false
+                    ma_iv_up.isEnabled = false
+                    ma_iv_down.isEnabled = false
+                }else if(state == "enable"){
+                    ma_iv_left.isEnabled = true
+                    ma_iv_up.isEnabled = true
+                    ma_iv_down.isEnabled = true
+                }
+            }
+            "forward" -> {
+                if(state == "disable"){
+                    ma_iv_right.isEnabled = false
+                    ma_iv_left.isEnabled = false
+                    ma_iv_down.isEnabled = false
+                }else if(state == "enable"){
+                    ma_iv_right.isEnabled = true
+                    ma_iv_left.isEnabled = true
+                    ma_iv_down.isEnabled = true
+                }
+            }
+            "backward" -> {
+                if(state == "disable"){
+                    ma_iv_right.isEnabled = false
+                    ma_iv_up.isEnabled = false
+                    ma_iv_left.isEnabled = false
+                }else if(state == "enable"){
+                    ma_iv_right.isEnabled = true
+                    ma_iv_up.isEnabled = true
+                    ma_iv_left.isEnabled = true
+                }
+            }
+        }
     }
 
 }
