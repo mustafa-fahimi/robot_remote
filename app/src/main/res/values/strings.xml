@@ -10,4 +10,7 @@
     <string name="one_shot_gun">تفنگ تک تیر</string>
     <string name="rapid_gun">تفنگ رگبار</string>
     <string name="toggle_gun">تفنگ ثابت</string>
+    <string name="new_wifi_pass">رمز وای فای جدید</string>
+    <string name="new_wifi_pass_again">تکرار رمز وای فای جدید</string>
+    <string name="submit_on_board">ثبت در مدار</string>
 </resources>

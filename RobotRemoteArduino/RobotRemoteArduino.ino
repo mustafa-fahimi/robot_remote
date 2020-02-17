@@ -10,6 +10,7 @@ const char* password = "12345678";
 const char* secretToken = "";
 const char* reqType = "";
 const char* reqState = "";
+const char* reqNewPass = "";
 
 const int gun1 = 5;
 const int gun2 = 4;
@@ -37,7 +38,7 @@ void setup(void){
   digitalWrite(engine2_1, LOW);
   digitalWrite(engine2_2, LOW);
   WiFi.mode(WIFI_AP); //Only Access point
-  WiFi.softAP(ssid, password); //Start HOTspot removing password will disable security
+  WiFi.softAP(ssid, password,5,false,1); //Start HOTspot removing password will disable security
   
   server.on("/remote", switchRelay);
   server.begin(); //Start server
@@ -127,6 +128,10 @@ void switchRelay(){
             digitalWrite(gun3, LOW);
             server.send(200, "application/json", "{\"result\":\"done\"}");
           }
+        }else if(String(reqType).equals("changePassword")){
+          //TODO: Set new password to eeprom
+          reqNewPass = root["newPassword"];
+          
         }else{
           server.send(200, "application/json", "{\"result\":\"NodeMcuError\"}");
         }
