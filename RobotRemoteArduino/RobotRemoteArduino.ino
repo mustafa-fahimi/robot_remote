@@ -4,12 +4,9 @@
 #include <ArduinoJson.h>
 #include <EEPROM.h>
 
-
-
-//SSID and Password to your ESP Access Point
+//variables decleration
 const char* AP_SSID = "ESP_Remote";
 char AP_PASS[20] = "";
-
 const char* secretToken = "";
 const char* reqType = "";
 const char* reqState = "";
@@ -19,7 +16,13 @@ int eepromAddressCount = 10; //EEPROM Address
 int eepromAddress = 20; //EEPROM Address
 byte eepromGetValue;
 byte eepromGetValueCount;
+int buttonState = 0;
+unsigned long startMillis; 
+unsigned long currentMillis;
+const unsigned long period = 500;
+int timeCounter = 0;
 
+//Pins decleration
 const int gun1 = 5; //D1
 const int gun2 = 4; //D2
 const int gun3 = 15; //D8
@@ -27,6 +30,7 @@ const int engine1_1 = 16; //D0
 const int engine1_2 = 14; //D5
 const int engine2_1 = 12; //D6
 const int engine2_2 = 13; //D7
+const int pushButton = 3; //RX
 
 ESP8266WebServer server(80); //Server on port 80
 
@@ -34,6 +38,8 @@ void setup(void){
   Serial.begin(9600);
   Serial.println("");
   EEPROM.begin(512);
+  startMillis = millis();
+  
   pinMode(gun1, OUTPUT);
   pinMode(gun2, OUTPUT);
   pinMode(gun3, OUTPUT);
@@ -41,6 +47,8 @@ void setup(void){
   pinMode(engine1_2, OUTPUT);
   pinMode(engine2_1, OUTPUT);
   pinMode(engine2_2, OUTPUT);
+  pinMode(pushButton, INPUT_PULLUP);
+  
   digitalWrite(gun1, LOW);
   digitalWrite(gun2, LOW);
   digitalWrite(gun3, LOW);
@@ -49,9 +57,9 @@ void setup(void){
   digitalWrite(engine2_1, LOW);
   digitalWrite(engine2_2, LOW);
 
-  (getPassFromEEPROM()).toCharArray(AP_PASS, 50); //get access point password from EEPROM
-  WiFi.mode(WIFI_AP); //Only Access point
-  WiFi.softAP(AP_SSID, AP_PASS, 5, false, 1); //Start HOTspot removing password will disable security
+  (getPassFromEEPROM()).toCharArray(AP_PASS, 20); //get access point password from EEPROM
+  WiFi.mode(WIFI_AP);
+  WiFi.softAP(AP_SSID, AP_PASS, 5, false, 1); //Start Hotspot removing password will disable security
   
   server.on("/remote", switchRelay);
   server.begin(); //Start server
@@ -60,6 +68,30 @@ void setup(void){
 void(* resetFunc) (void) = 0; //declare reset function @ address 0
 
 void loop(void){
+  buttonState = digitalRead(pushButton);
+  if(buttonState == LOW) {
+    currentMillis = millis();
+    if(currentMillis - startMillis >= period){
+      startMillis = currentMillis;
+      timeCounter++;
+    }
+    if(timeCounter == 6){
+      timeCounter = 0;
+      char defaultPass[12] = "asakrobatic";
+      EEPROM.write(eepromAddressCount, 11);
+      int x = 0;
+      for(int i=eepromAddress; i < (eepromAddress + 11); i++){
+        EEPROM.write(i, defaultPass[x]);
+        x++;
+      }
+      EEPROM.commit();
+      Serial.println("resetting");
+      delay(1000);
+      resetFunc(); //call reset
+    }
+  }else if(buttonState == HIGH){
+    timeCounter = 0;
+  }
   server.handleClient(); //Handle client requests
 }
 
@@ -147,6 +179,7 @@ void switchRelay(){
           }
           EEPROM.commit();
           delay(1500);
+          //FIXME: gives volley timeout in android
           resetFunc(); //call reset 
         }else{
           server.send(200, "application/json", "{\"result\":\"NodeMcuError\"}");
