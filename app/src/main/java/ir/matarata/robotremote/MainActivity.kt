@@ -1,5 +1,6 @@
 package ir.matarata.robotremote
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.MotionEvent
 import androidx.appcompat.app.AppCompatActivity
@@ -127,6 +128,10 @@ class MainActivity : AppCompatActivity() {
                 val jsonObj = JSONObject("{\"token\":\"MatarataSecretToken1994\",\"request\":\"gun3\",\"state\":\"off\"}")
                 volleyJsonReq(jsonObj, "gun3")
             }
+        }
+        ma_btn_settings.setOnClickListener {
+            intent = Intent(this, SettingActivity::class.java)
+            startActivity(intent)
         }
 
     }
@@ -283,47 +288,47 @@ class MainActivity : AppCompatActivity() {
         requestQueue.add(jsonObjectRequest)
     }
 
-    private fun disableEnableOtherViews(view: String, state: String){
-        when(view){
+    private fun disableEnableOtherViews(view: String, state: String) {
+        when (view) {
             "left" -> {
-                if(state == "disable"){
+                if (state == "disable") {
                     ma_iv_right.isEnabled = false
                     ma_iv_up.isEnabled = false
                     ma_iv_down.isEnabled = false
-                }else if(state == "enable"){
+                } else if (state == "enable") {
                     ma_iv_right.isEnabled = true
                     ma_iv_up.isEnabled = true
                     ma_iv_down.isEnabled = true
                 }
             }
             "right" -> {
-                if(state == "disable"){
+                if (state == "disable") {
                     ma_iv_left.isEnabled = false
                     ma_iv_up.isEnabled = false
                     ma_iv_down.isEnabled = false
-                }else if(state == "enable"){
+                } else if (state == "enable") {
                     ma_iv_left.isEnabled = true
                     ma_iv_up.isEnabled = true
                     ma_iv_down.isEnabled = true
                 }
             }
             "forward" -> {
-                if(state == "disable"){
+                if (state == "disable") {
                     ma_iv_right.isEnabled = false
                     ma_iv_left.isEnabled = false
                     ma_iv_down.isEnabled = false
-                }else if(state == "enable"){
+                } else if (state == "enable") {
                     ma_iv_right.isEnabled = true
                     ma_iv_left.isEnabled = true
                     ma_iv_down.isEnabled = true
                 }
             }
             "backward" -> {
-                if(state == "disable"){
+                if (state == "disable") {
                     ma_iv_right.isEnabled = false
                     ma_iv_up.isEnabled = false
                     ma_iv_left.isEnabled = false
-                }else if(state == "enable"){
+                } else if (state == "enable") {
                     ma_iv_right.isEnabled = true
                     ma_iv_up.isEnabled = true
                     ma_iv_left.isEnabled = true

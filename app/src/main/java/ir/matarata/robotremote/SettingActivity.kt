@@ -2,6 +2,7 @@ package ir.matarata.robotremote
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request
@@ -34,11 +35,12 @@ class SettingActivity : AppCompatActivity() {
                     sa_et_newPassword.error = "حداقل 8 کاراکتر باشد"
                     return@setOnClickListener
                 }
-                sa_et_newPasswordAgain.text != sa_et_newPassword.text -> {
+                sa_et_newPasswordAgain.text.toString() != sa_et_newPassword.text.toString() -> {
                     sa_et_newPasswordAgain.error = "تکرار رمز اشتباه است"
                     return@setOnClickListener
                 }
             }
+            //TODO: add a progress loader
             val newPassword = sa_et_newPassword.text.toString()
             val jsonObj = JSONObject("{\"token\":\"MatarataSecretToken1994\",\"request\":\"changePassword\",\"newPassword\":\"$newPassword\"}")
             volleyJsonReq(jsonObj)
@@ -55,21 +57,36 @@ class SettingActivity : AppCompatActivity() {
             Response.Listener<JSONObject?> { response ->
                 val res: String? = response?.getString("result")
                 if (res.equals("done")) {
-
+                    //TODO: show alert dialog for success
+                    sa_et_newPassword.text?.clear()
+                    sa_et_newPasswordAgain.text?.clear()
+                    Toast.makeText(this, "done",Toast.LENGTH_SHORT).show()
                 } else {
-
+                    //TODO: show alert dialog for failure
+                    Toast.makeText(this, response.toString(),Toast.LENGTH_SHORT).show()
                 }
             },
             Response.ErrorListener {
-
+                //TODO: show alert dialog for failure
+                Toast.makeText(this, it.toString(),Toast.LENGTH_SHORT).show()
             }
         )
         jsonObjectRequest.retryPolicy = DefaultRetryPolicy(
-            500,
+            1000,
             1,
-            1F
+            2F
         )
         requestQueue.add(jsonObjectRequest)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        finish()
+    }
+
+    override fun onStop() {
+        super.onStop()
+        finish()
     }
 
 }
