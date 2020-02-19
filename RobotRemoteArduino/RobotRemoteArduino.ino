@@ -6,7 +6,7 @@
 
 //variables decleration
 const char* AP_SSID = "ESP_Remote";
-char AP_PASS[20] = "";
+char AP_PASS[20] = "asakrobatic";
 const char* secretToken = "";
 const char* reqType = "";
 const char* reqState = "";
@@ -21,6 +21,7 @@ unsigned long startMillis;
 unsigned long currentMillis;
 const unsigned long period = 500;
 int timeCounter = 0;
+float voltage;
 
 //Pins decleration
 const int gun1 = 5; //D1
@@ -48,6 +49,7 @@ void setup(void){
   pinMode(engine2_1, OUTPUT);
   pinMode(engine2_2, OUTPUT);
   pinMode(pushButton, INPUT_PULLUP);
+  pinMode(A0, INPUT);
   
   digitalWrite(gun1, LOW);
   digitalWrite(gun2, LOW);
@@ -85,7 +87,6 @@ void loop(void){
         x++;
       }
       EEPROM.commit();
-      Serial.println("resetting");
       delay(1000);
       resetFunc(); //call reset
     }
@@ -127,12 +128,14 @@ void switchRelay(){
             digitalWrite(engine2_1, LOW);
           }
         }else if(String(reqType).equals("forward")){
-          server.send(200, "application/json", "{\"result\":\"done\"}");
+          voltage = ((analogRead(A0) * 3.3) / 1023.0) / 0.12;
           reqState = root["state"];
           if(String(reqState).equals("on")){
+            server.send(200, "application/json", "{\"result\":\"done\", \"voltage\":\"" + (String) voltage + "\"}");
             digitalWrite(engine1_1, HIGH);
             digitalWrite(engine2_1, HIGH);
           }else if(String(reqState).equals("off")){
+            server.send(200, "application/json", "{\"result\":\"done\"}");
             digitalWrite(engine1_1, LOW);
             digitalWrite(engine2_1, LOW);
           }
@@ -147,7 +150,8 @@ void switchRelay(){
             digitalWrite(engine2_2, LOW);
           }
         }else if(String(reqType).equals("gun1")){
-          server.send(200, "application/json", "{\"result\":\"done\"}");
+          voltage = ((analogRead(A0) * 3.3) / 1023.0) / 0.12;
+          server.send(200, "application/json", "{\"result\":\"done\", \"voltage\":\"" + (String) voltage + "\"}");
           digitalWrite(gun1, HIGH);
           delay(400);
           digitalWrite(gun1, LOW);

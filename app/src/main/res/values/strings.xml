@@ -13,4 +13,5 @@
     <string name="new_wifi_pass">رمز وای فای جدید</string>
     <string name="new_wifi_pass_again">تکرار رمز وای فای جدید</string>
     <string name="submit_on_board">ثبت در مدار</string>
+    <string name="battery_voltage">ولتاژ باتری موتور: نامعلوم</string>
 </resources>

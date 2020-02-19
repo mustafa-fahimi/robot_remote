@@ -2,7 +2,9 @@ package ir.matarata.robotremote
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.MotionEvent
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.android.volley.DefaultRetryPolicy
@@ -146,6 +148,10 @@ class MainActivity : AppCompatActivity() {
                 val res: String? = response?.getString("result")
                 if (res.equals("done")) {
                     when (elementName) {
+                        "gun1" -> {
+                            val tempVoltage = response?.getString("voltage")
+                            ma_tv_batteryVoltage.text = "ولتاژ باتری موتور: $tempVoltage ولت"
+                        }
                         "gun2" -> {
                             if (jsonObj.getString("state") == "on") {
                                 ma_btn_gun2.backgroundColor = ContextCompat.getColor(this, R.color.colorAccent)
@@ -227,6 +233,8 @@ class MainActivity : AppCompatActivity() {
                         }
                         "forward" -> {
                             if (jsonObj.getString("state") == "on") {
+                                val tempVoltage = response?.getString("voltage")
+                                ma_tv_batteryVoltage.text = "ولتاژ باتری موتور: $tempVoltage ولت"
                                 ma_iv_up.setColorFilter(ContextCompat.getColor(this, R.color.colorAccent), android.graphics.PorterDuff.Mode.MULTIPLY)
                             } else {
                                 ma_iv_up.colorFilter = null
