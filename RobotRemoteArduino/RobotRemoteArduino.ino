@@ -36,7 +36,7 @@ const int pushButton = 3; //RX
 ESP8266WebServer server(80); //Server on port 80
 
 void setup(void){
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial.println("");
   EEPROM.begin(512);
   startMillis = millis();
@@ -70,30 +70,13 @@ void setup(void){
 void(* resetFunc) (void) = 0; //declare reset function @ address 0
 
 void loop(void){
+  server.handleClient(); //Handle client requests
   buttonState = digitalRead(pushButton);
   if(buttonState == LOW) {
-    currentMillis = millis();
-    if(currentMillis - startMillis >= period){
-      startMillis = currentMillis;
-      timeCounter++;
-    }
-    if(timeCounter == 6){
-      timeCounter = 0;
-      char defaultPass[12] = "asakrobatic";
-      EEPROM.write(eepromAddressCount, 11);
-      int x = 0;
-      for(int i=eepromAddress; i < (eepromAddress + 11); i++){
-        EEPROM.write(i, defaultPass[x]);
-        x++;
-      }
-      EEPROM.commit();
-      delay(1000);
-      resetFunc(); //call reset
-    }
+    pushButtonResetHotspot();
   }else if(buttonState == HIGH){
     timeCounter = 0;
   }
-  server.handleClient(); //Handle client requests
 }
 
 void switchRelay(){
@@ -107,48 +90,34 @@ void switchRelay(){
       secretToken = root["token"];
       if(String(secretToken).equals("MatarataSecretToken1994")){
         reqType = root["request"];
-        if(String(reqType).equals("left")){
+        if(String(reqType).equals("motor_left")){
           server.send(200, "application/json", "{\"result\":\"done\"}");
-          reqState = root["state"];
-          if(String(reqState).equals("on")){
-            digitalWrite(engine1_1, HIGH);
-            digitalWrite(engine2_2, HIGH);
-          }else if(String(reqState).equals("off")){
-            digitalWrite(engine1_1, LOW);
-            digitalWrite(engine2_2, LOW);
-          }
-        }else if(String(reqType).equals("right")){
+          digitalWrite(engine1_1, HIGH);
+          digitalWrite(engine2_2, HIGH);
+          Serial.println("l");
+        }else if(String(reqType).equals("motor_right")){
           server.send(200, "application/json", "{\"result\":\"done\"}");
-          reqState = root["state"];
-          if(String(reqState).equals("on")){
-            digitalWrite(engine1_2, HIGH);
-            digitalWrite(engine2_1, HIGH);
-          }else if(String(reqState).equals("off")){
-            digitalWrite(engine1_2, LOW);
-            digitalWrite(engine2_1, LOW);
-          }
-        }else if(String(reqType).equals("forward")){
+          digitalWrite(engine1_2, HIGH);
+          digitalWrite(engine2_1, HIGH);
+          Serial.println("r");
+        }else if(String(reqType).equals("motor_forward")){
           voltage = ((analogRead(A0) * 3.3) / 1023.0) / 0.12;
-          reqState = root["state"];
-          if(String(reqState).equals("on")){
-            server.send(200, "application/json", "{\"result\":\"done\", \"voltage\":\"" + (String) voltage + "\"}");
-            digitalWrite(engine1_1, HIGH);
-            digitalWrite(engine2_1, HIGH);
-          }else if(String(reqState).equals("off")){
-            server.send(200, "application/json", "{\"result\":\"done\"}");
-            digitalWrite(engine1_1, LOW);
-            digitalWrite(engine2_1, LOW);
-          }
-        }else if(String(reqType).equals("backward")){
+          server.send(200, "application/json", "{\"result\":\"done\", \"voltage\":\"" + (String) voltage + "\"}");
+          digitalWrite(engine1_1, HIGH);
+          digitalWrite(engine2_1, HIGH);
+          Serial.println("f");
+        }else if(String(reqType).equals("motor_backward")){
           server.send(200, "application/json", "{\"result\":\"done\"}");
-          reqState = root["state"];
-          if(String(reqState).equals("on")){
-            digitalWrite(engine1_2, HIGH);
-            digitalWrite(engine2_2, HIGH);
-          }else if(String(reqState).equals("off")){
-            digitalWrite(engine1_2, LOW);
-            digitalWrite(engine2_2, LOW);
-          }
+          digitalWrite(engine1_2, HIGH);
+          digitalWrite(engine2_2, HIGH);
+          Serial.println("b");
+        }else if(String(reqType).equals("motor_off")){
+          server.send(200, "application/json", "{\"result\":\"done\"}");
+          digitalWrite(engine1_1, LOW);
+          analogWrite(engine1_2, 0);
+          analogWrite(engine2_1, 0);
+          digitalWrite(engine2_2, LOW);
+          Serial.println("off");
         }else if(String(reqType).equals("gun1")){
           voltage = ((analogRead(A0) * 3.3) / 1023.0) / 0.12;
           server.send(200, "application/json", "{\"result\":\"done\", \"voltage\":\"" + (String) voltage + "\"}");
@@ -203,4 +172,25 @@ String getPassFromEEPROM(){
     data = data + ((char) EEPROM.read(i));
   }
   return data;
+}
+
+void pushButtonResetHotspot(){
+  currentMillis = millis();
+    if(currentMillis - startMillis >= period){
+      startMillis = currentMillis;
+      timeCounter++;
+    }
+    if(timeCounter == 6){
+      timeCounter = 0;
+      char defaultPass[12] = "asakrobatic";
+      EEPROM.write(eepromAddressCount, 11);
+      int x = 0;
+      for(int i=eepromAddress; i < (eepromAddress + 11); i++){
+        EEPROM.write(i, defaultPass[x]);
+        x++;
+      }
+      EEPROM.commit();
+      delay(1000);
+      resetFunc(); //call reset
+    }
 }

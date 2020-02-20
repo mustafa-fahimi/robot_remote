@@ -12,6 +12,7 @@ import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import io.github.controlwear.virtual.joystick.android.JoystickView
 import kotlinx.android.synthetic.main.activity_main.*
 import org.json.JSONObject
 
@@ -20,82 +21,12 @@ class MainActivity : AppCompatActivity() {
 
     private val nodeMcuURL = "http://192.168.4.1/remote"
     private var gun3State = false
+    private var joystickState = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        ma_iv_left.setOnTouchListener { _, event ->
-            //change the color of arrow when they are on hold by user
-            when (event.actionMasked) {
-                MotionEvent.ACTION_DOWN -> {
-                    disableEnableOtherViews("left", "disable")
-                    val jsonObj = JSONObject("{\"token\":\"MatarataSecretToken1994\",\"request\":\"left\",\"state\":\"on\"}")
-                    volleyJsonReqArrows(jsonObj, "left")
-                    ma_iv_left.setColorFilter(ContextCompat.getColor(this, R.color.colorAccent), android.graphics.PorterDuff.Mode.MULTIPLY)
-                }
-                MotionEvent.ACTION_UP -> {
-                    disableEnableOtherViews("left", "enable")
-                    val jsonObj = JSONObject("{\"token\":\"MatarataSecretToken1994\",\"request\":\"left\",\"state\":\"off\"}")
-                    volleyJsonReqArrows(jsonObj, "left")
-                    ma_iv_left.colorFilter = null
-                }
-            }
-            true
-        }
-        ma_iv_right.setOnTouchListener { _, event ->
-            //change the color of arrow when they are on hold by user
-            when (event.actionMasked) {
-                MotionEvent.ACTION_DOWN -> {
-                    disableEnableOtherViews("right", "disable")
-                    val jsonObj = JSONObject("{\"token\":\"MatarataSecretToken1994\",\"request\":\"right\",\"state\":\"on\"}")
-                    volleyJsonReqArrows(jsonObj, "right")
-                    ma_iv_right.setColorFilter(ContextCompat.getColor(this, R.color.colorAccent), android.graphics.PorterDuff.Mode.MULTIPLY)
-                }
-                MotionEvent.ACTION_UP -> {
-                    disableEnableOtherViews("right", "enable")
-                    val jsonObj = JSONObject("{\"token\":\"MatarataSecretToken1994\",\"request\":\"right\",\"state\":\"off\"}")
-                    volleyJsonReqArrows(jsonObj, "right")
-                    ma_iv_right.colorFilter = null
-                }
-            }
-            true
-        }
-        ma_iv_up.setOnTouchListener { _, event ->
-            //change the color of arrow when they are on hold by user
-            when (event.actionMasked) {
-                MotionEvent.ACTION_DOWN -> {
-                    disableEnableOtherViews("forward", "disable")
-                    val jsonObj = JSONObject("{\"token\":\"MatarataSecretToken1994\",\"request\":\"forward\",\"state\":\"on\"}")
-                    volleyJsonReqArrows(jsonObj, "forward")
-                    ma_iv_up.setColorFilter(ContextCompat.getColor(this, R.color.colorAccent), android.graphics.PorterDuff.Mode.MULTIPLY)
-                }
-                MotionEvent.ACTION_UP -> {
-                    disableEnableOtherViews("forward", "enable")
-                    val jsonObj = JSONObject("{\"token\":\"MatarataSecretToken1994\",\"request\":\"forward\",\"state\":\"off\"}")
-                    volleyJsonReqArrows(jsonObj, "forward")
-                    ma_iv_up.colorFilter = null
-                }
-            }
-            true
-        }
-        ma_iv_down.setOnTouchListener { _, event ->
-            when (event.actionMasked) {
-                MotionEvent.ACTION_DOWN -> {
-                    disableEnableOtherViews("backward", "disable")
-                    val jsonObj = JSONObject("{\"token\":\"MatarataSecretToken1994\",\"request\":\"backward\",\"state\":\"on\"}")
-                    volleyJsonReqArrows(jsonObj, "backward")
-                    ma_iv_down.setColorFilter(ContextCompat.getColor(this, R.color.colorAccent), android.graphics.PorterDuff.Mode.MULTIPLY)
-                }
-                MotionEvent.ACTION_UP -> {
-                    disableEnableOtherViews("backward", "enable")
-                    val jsonObj = JSONObject("{\"token\":\"MatarataSecretToken1994\",\"request\":\"backward\",\"state\":\"off\"}")
-                    volleyJsonReqArrows(jsonObj, "backward")
-                    ma_iv_down.colorFilter = null
-                }
-            }
-            true
-        }
         ma_btn_gun1.setOnTouchListener { _, event ->
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
@@ -135,6 +66,22 @@ class MainActivity : AppCompatActivity() {
             intent = Intent(this, SettingActivity::class.java)
             startActivity(intent)
         }
+        ma_jsv_joystick.setOnMoveListener({ angle, strength ->
+            if(strength > 15 && (angle in 315..360 || angle in 0..45)){
+                joystickState = "motor_right"
+            }else if(strength > 15 && angle in 45..135){
+                joystickState = "motor_forward"
+            }else if(strength > 15 && angle in 135..225){
+                joystickState = "motor_left"
+            }else if(strength > 15 && angle in 225..315){
+                joystickState = "motor_backward"
+            }else if(strength < 15){
+                joystickState = "motor_off"
+            }
+            Log.d("MATATAG", "joystickState: $joystickState, Angle: $angle, Strength: $strength")
+            val jsonObj = JSONObject("{\"token\":\"MatarataSecretToken1994\",\"request\":\"$joystickState\", \"strength\":\"$strength\"}")
+            volleyJsonReqJoystick(jsonObj)
+        }, 900)
 
     }
 
@@ -207,7 +154,7 @@ class MainActivity : AppCompatActivity() {
         requestQueue.add(jsonObjectRequest)
     }
 
-    private fun volleyJsonReqArrows(jsonObj: JSONObject, arrowDirection: String) {
+    private fun volleyJsonReqJoystick(jsonObj: JSONObject) {
         val requestQueue = Volley.newRequestQueue(this)
         val jsonObjectRequest = JsonObjectRequest(
             Request.Method.POST,
@@ -216,74 +163,14 @@ class MainActivity : AppCompatActivity() {
             Response.Listener<JSONObject?> { response ->
                 val res: String? = response?.getString("result")
                 if (res.equals("done")) {
-                    when (arrowDirection) {
-                        "left" -> {
-                            if (jsonObj.getString("state") == "on") {
-                                ma_iv_left.setColorFilter(ContextCompat.getColor(this, R.color.colorAccent), android.graphics.PorterDuff.Mode.MULTIPLY)
-                            } else {
-                                ma_iv_left.colorFilter = null
-                            }
-                        }
-                        "right" -> {
-                            if (jsonObj.getString("state") == "on") {
-                                ma_iv_right.setColorFilter(ContextCompat.getColor(this, R.color.colorAccent), android.graphics.PorterDuff.Mode.MULTIPLY)
-                            } else {
-                                ma_iv_right.colorFilter = null
-                            }
-                        }
-                        "forward" -> {
-                            if (jsonObj.getString("state") == "on") {
-                                val tempVoltage = response?.getString("voltage")
-                                ma_tv_batteryVoltage.text = "ولتاژ باتری موتور: $tempVoltage ولت"
-                                ma_iv_up.setColorFilter(ContextCompat.getColor(this, R.color.colorAccent), android.graphics.PorterDuff.Mode.MULTIPLY)
-                            } else {
-                                ma_iv_up.colorFilter = null
-                            }
-                        }
-                        "backward" -> {
-                            if (jsonObj.getString("state") == "on") {
-                                ma_iv_down.setColorFilter(ContextCompat.getColor(this, R.color.colorAccent), android.graphics.PorterDuff.Mode.MULTIPLY)
-                            } else {
-                                ma_iv_down.colorFilter = null
-                            }
-                        }
-                    }
                     ma_tv_connectionState.text = getString(R.string.connection_state_connected)
                     ma_tv_connectionState.setTextColor(ContextCompat.getColor(this, R.color.colorAccent))
                 } else {
-                    when (arrowDirection) {
-                        "left" -> {
-                            ma_iv_left.colorFilter = null
-                        }
-                        "right" -> {
-                            ma_iv_right.colorFilter = null
-                        }
-                        "forward" -> {
-                            ma_iv_up.colorFilter = null
-                        }
-                        "backward" -> {
-                            ma_iv_down.colorFilter = null
-                        }
-                    }
                     ma_tv_connectionState.text = getString(R.string.connection_state_problem)
                     ma_tv_connectionState.setTextColor(ContextCompat.getColor(this, R.color.red_color))
                 }
             },
             Response.ErrorListener {
-                when (arrowDirection) {
-                    "left" -> {
-                        ma_iv_left.colorFilter = null
-                    }
-                    "right" -> {
-                        ma_iv_right.colorFilter = null
-                    }
-                    "forward" -> {
-                        ma_iv_up.colorFilter = null
-                    }
-                    "backward" -> {
-                        ma_iv_down.colorFilter = null
-                    }
-                }
                 ma_tv_connectionState.text = getString(R.string.connection_state_problem)
                 ma_tv_connectionState.setTextColor(ContextCompat.getColor(this, R.color.red_color))
             }
@@ -294,55 +181,6 @@ class MainActivity : AppCompatActivity() {
             0.7F
         )
         requestQueue.add(jsonObjectRequest)
-    }
-
-    private fun disableEnableOtherViews(view: String, state: String) {
-        when (view) {
-            "left" -> {
-                if (state == "disable") {
-                    ma_iv_right.isEnabled = false
-                    ma_iv_up.isEnabled = false
-                    ma_iv_down.isEnabled = false
-                } else if (state == "enable") {
-                    ma_iv_right.isEnabled = true
-                    ma_iv_up.isEnabled = true
-                    ma_iv_down.isEnabled = true
-                }
-            }
-            "right" -> {
-                if (state == "disable") {
-                    ma_iv_left.isEnabled = false
-                    ma_iv_up.isEnabled = false
-                    ma_iv_down.isEnabled = false
-                } else if (state == "enable") {
-                    ma_iv_left.isEnabled = true
-                    ma_iv_up.isEnabled = true
-                    ma_iv_down.isEnabled = true
-                }
-            }
-            "forward" -> {
-                if (state == "disable") {
-                    ma_iv_right.isEnabled = false
-                    ma_iv_left.isEnabled = false
-                    ma_iv_down.isEnabled = false
-                } else if (state == "enable") {
-                    ma_iv_right.isEnabled = true
-                    ma_iv_left.isEnabled = true
-                    ma_iv_down.isEnabled = true
-                }
-            }
-            "backward" -> {
-                if (state == "disable") {
-                    ma_iv_right.isEnabled = false
-                    ma_iv_up.isEnabled = false
-                    ma_iv_left.isEnabled = false
-                } else if (state == "enable") {
-                    ma_iv_right.isEnabled = true
-                    ma_iv_up.isEnabled = true
-                    ma_iv_left.isEnabled = true
-                }
-            }
-        }
     }
 
 }
