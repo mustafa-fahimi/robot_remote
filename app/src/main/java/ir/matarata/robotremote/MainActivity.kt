@@ -2,12 +2,12 @@ package ir.matarata.robotremote
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.MotionEvent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.android.volley.DefaultRetryPolicy
 import com.android.volley.Request
+import com.android.volley.RequestQueue
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
@@ -18,10 +18,12 @@ import org.json.JSONObject
 class MainActivity : AppCompatActivity() {
 
     private val nodeMcuURL = "http://192.168.4.1/remote"
+    private lateinit var requestQueue: RequestQueue
     private var gun3State = false
     private var joystickState = ""
     private var mappedStrength = 0
     private var mappedStrengthReverse = 0
+    private var onPaused = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,8 +67,20 @@ class MainActivity : AppCompatActivity() {
         ma_btn_settings.setOnClickListener {
             intent = Intent(this, SettingActivity::class.java)
             startActivity(intent)
+            finish()
         }
         ma_jsv_joystick.setOnMoveListener({ angle, strength ->
+            if(onPaused){
+                joystickState = "motor_off"
+                val jsonObj = JSONObject(
+                    "{\"token\":\"MatarataSecretToken1994\"," +
+                            "\"request\":\"$joystickState\"," +
+                            "\"strength\":\"0\"," +
+                            "\"strengthRev\":\"1023\"}"
+                )
+                volleyJsonReqJoystick(jsonObj)
+                return@setOnMoveListener
+            }
             if (strength > 15 && (angle in 315..360 || angle in 0..45)) {
                 joystickState = "motor_right"
             } else if (strength > 12 && angle in 45..135) {
@@ -79,10 +93,9 @@ class MainActivity : AppCompatActivity() {
                 joystickState = "motor_off"
             }
             //Converted strength to range [0..1023]
-            mappedStrength = mapRange(IntRange(0, 100), IntRange(400, 1023), strength)
+            mappedStrength = mapRange(IntRange(0, 100), IntRange(500, 1030), strength)
             //Converted strength to range [1023..0]
-            mappedStrengthReverse = mapRange(IntRange(0, 100), IntRange(1023, 400), strength)
-            Log.d("MATATAG", "mappedStrength: $mappedStrength --- mappedStrengthRev: $mappedStrengthReverse")
+            mappedStrengthReverse = mapRange(IntRange(0, 100), IntRange(530, 0), strength)
             val jsonObj = JSONObject(
                 "{\"token\":\"MatarataSecretToken1994\"," +
                         "\"request\":\"$joystickState\"," +
@@ -95,7 +108,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun volleyJsonReq(jsonObj: JSONObject, elementName: String) {
-        val requestQueue = Volley.newRequestQueue(this)
+        requestQueue = Volley.newRequestQueue(this)
         val jsonObjectRequest = JsonObjectRequest(
             Request.Method.POST,
             nodeMcuURL,
@@ -164,7 +177,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun volleyJsonReqJoystick(jsonObj: JSONObject) {
-        val requestQueue = Volley.newRequestQueue(this)
+        requestQueue = Volley.newRequestQueue(this)
         val jsonObjectRequest = JsonObjectRequest(
             Request.Method.POST,
             nodeMcuURL,
@@ -193,9 +206,33 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun mapRange(range1: IntRange, range2: IntRange, value: Int): Int {
-        if (value !in range1) throw IllegalArgumentException("value is not within the first range")
-        if (range1.endInclusive == range1.start) throw IllegalArgumentException("first range cannot be single-valued")
-        return range2.start + (value - range1.start) * (range2.endInclusive - range2.start) / (range1.endInclusive - range1.start)
+        return try {
+            range2.start + (value - range1.start) * (range2.endInclusive - range2.start) / (range1.endInclusive - range1.start)
+        }catch (e: Exception){
+            0
+        }
+    }
+
+    override fun onPause() {
+        onPaused = true
+        super.onPause()
+    }
+
+    override fun onStop() {
+        onPaused = true
+        super.onStop()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        onPaused = false
+        ma_jsv_joystick.resetButtonPosition()
+    }
+
+    override fun onRestart() {
+        super.onRestart()
+        onPaused = false
+        ma_jsv_joystick.resetButtonPosition()
     }
 
 }

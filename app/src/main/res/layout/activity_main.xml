@@ -10,8 +10,8 @@
 
     <io.github.controlwear.virtual.joystick.android.JoystickView
         android:id="@+id/ma_jsv_joystick"
-        android:layout_width="220dp"
-        android:layout_height="220dp"
+        android:layout_width="230dp"
+        android:layout_height="230dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

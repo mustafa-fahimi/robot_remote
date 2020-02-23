@@ -1,5 +1,6 @@
 package ir.matarata.robotremote
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
@@ -86,6 +87,13 @@ class SettingActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
+        finish()
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        intent = Intent(this, MainActivity::class.java)
+        startActivity(intent)
         finish()
     }
 
