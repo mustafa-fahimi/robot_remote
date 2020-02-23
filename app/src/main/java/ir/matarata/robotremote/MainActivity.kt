@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.MotionEvent
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.android.volley.DefaultRetryPolicy
@@ -12,7 +11,6 @@ import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
-import io.github.controlwear.virtual.joystick.android.JoystickView
 import kotlinx.android.synthetic.main.activity_main.*
 import org.json.JSONObject
 
@@ -22,6 +20,8 @@ class MainActivity : AppCompatActivity() {
     private val nodeMcuURL = "http://192.168.4.1/remote"
     private var gun3State = false
     private var joystickState = ""
+    private var mappedStrength = 0
+    private var mappedStrengthReverse = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,21 +67,30 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
         ma_jsv_joystick.setOnMoveListener({ angle, strength ->
-            if(strength > 15 && (angle in 315..360 || angle in 0..45)){
+            if (strength > 15 && (angle in 315..360 || angle in 0..45)) {
                 joystickState = "motor_right"
-            }else if(strength > 15 && angle in 45..135){
+            } else if (strength > 12 && angle in 45..135) {
                 joystickState = "motor_forward"
-            }else if(strength > 15 && angle in 135..225){
+            } else if (strength > 12 && angle in 135..225) {
                 joystickState = "motor_left"
-            }else if(strength > 15 && angle in 225..315){
+            } else if (strength > 12 && angle in 225..315) {
                 joystickState = "motor_backward"
-            }else if(strength < 15){
+            } else if (strength < 12) {
                 joystickState = "motor_off"
             }
-            Log.d("MATATAG", "joystickState: $joystickState, Angle: $angle, Strength: $strength")
-            val jsonObj = JSONObject("{\"token\":\"MatarataSecretToken1994\",\"request\":\"$joystickState\", \"strength\":\"$strength\"}")
+            //Converted strength to range [0..1023]
+            mappedStrength = mapRange(IntRange(0, 100), IntRange(400, 1023), strength)
+            //Converted strength to range [1023..0]
+            mappedStrengthReverse = mapRange(IntRange(0, 100), IntRange(1023, 400), strength)
+            Log.d("MATATAG", "mappedStrength: $mappedStrength --- mappedStrengthRev: $mappedStrengthReverse")
+            val jsonObj = JSONObject(
+                "{\"token\":\"MatarataSecretToken1994\"," +
+                        "\"request\":\"$joystickState\"," +
+                        "\"strength\":\"$mappedStrength\"," +
+                        "\"strengthRev\":\"$mappedStrengthReverse\"}"
+            )
             volleyJsonReqJoystick(jsonObj)
-        }, 900)
+        }, 100)
 
     }
 
@@ -183,4 +192,12 @@ class MainActivity : AppCompatActivity() {
         requestQueue.add(jsonObjectRequest)
     }
 
+    private fun mapRange(range1: IntRange, range2: IntRange, value: Int): Int {
+        if (value !in range1) throw IllegalArgumentException("value is not within the first range")
+        if (range1.endInclusive == range1.start) throw IllegalArgumentException("first range cannot be single-valued")
+        return range2.start + (value - range1.start) * (range2.endInclusive - range2.start) / (range1.endInclusive - range1.start)
+    }
+
 }
+
+class IntRange(override val start: Int, override val endInclusive: Int) : ClosedRange<Int>

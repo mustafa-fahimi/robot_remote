@@ -10,6 +10,8 @@ char AP_PASS[20] = "asakrobatic";
 const char* secretToken = "";
 const char* reqType = "";
 const char* reqState = "";
+const char* reqStrength = "";
+const char* reqStrengthRev = "";
 const char* reqNewPass;
 int reqNewPassLength;
 int eepromAddressCount = 10; //EEPROM Address
@@ -22,6 +24,8 @@ unsigned long currentMillis;
 const unsigned long period = 500;
 int timeCounter = 0;
 float voltage;
+int motorStrength;
+int motorStrengthRev;
 
 //Pins decleration
 const int gun1 = 5; //D1
@@ -90,34 +94,41 @@ void switchRelay(){
       secretToken = root["token"];
       if(String(secretToken).equals("MatarataSecretToken1994")){
         reqType = root["request"];
+        reqStrength = root["strength"];
+        reqStrengthRev = root["strengthRev"];
+        motorStrength = ((String)reqStrength).toInt();
+        motorStrengthRev = ((String)reqStrengthRev).toInt();
         if(String(reqType).equals("motor_left")){
           server.send(200, "application/json", "{\"result\":\"done\"}");
           digitalWrite(engine1_1, HIGH);
+          analogWrite(engine1_2, motorStrengthRev);
+          analogWrite(engine2_1, motorStrengthRev);
           digitalWrite(engine2_2, HIGH);
-          Serial.println("l");
         }else if(String(reqType).equals("motor_right")){
           server.send(200, "application/json", "{\"result\":\"done\"}");
-          digitalWrite(engine1_2, HIGH);
-          digitalWrite(engine2_1, HIGH);
-          Serial.println("r");
+          digitalWrite(engine1_1, LOW);
+          analogWrite(engine1_2, motorStrength);
+          analogWrite(engine2_1, motorStrength);
+          digitalWrite(engine2_2, LOW);
         }else if(String(reqType).equals("motor_forward")){
           voltage = ((analogRead(A0) * 3.3) / 1023.0) / 0.12;
           server.send(200, "application/json", "{\"result\":\"done\", \"voltage\":\"" + (String) voltage + "\"}");
           digitalWrite(engine1_1, HIGH);
-          digitalWrite(engine2_1, HIGH);
-          Serial.println("f");
+          analogWrite(engine1_2, motorStrengthRev);
+          analogWrite(engine2_1, motorStrength);
+          digitalWrite(engine2_2, LOW);
         }else if(String(reqType).equals("motor_backward")){
           server.send(200, "application/json", "{\"result\":\"done\"}");
-          digitalWrite(engine1_2, HIGH);
+          digitalWrite(engine1_1, LOW);
+          analogWrite(engine1_2, motorStrength);
+          analogWrite(engine2_1, motorStrengthRev);
           digitalWrite(engine2_2, HIGH);
-          Serial.println("b");
         }else if(String(reqType).equals("motor_off")){
           server.send(200, "application/json", "{\"result\":\"done\"}");
           digitalWrite(engine1_1, LOW);
           analogWrite(engine1_2, 0);
           analogWrite(engine2_1, 0);
           digitalWrite(engine2_2, LOW);
-          Serial.println("off");
         }else if(String(reqType).equals("gun1")){
           voltage = ((analogRead(A0) * 3.3) / 1023.0) / 0.12;
           server.send(200, "application/json", "{\"result\":\"done\", \"voltage\":\"" + (String) voltage + "\"}");
