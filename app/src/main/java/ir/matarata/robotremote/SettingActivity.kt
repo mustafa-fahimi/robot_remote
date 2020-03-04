@@ -3,6 +3,7 @@ package ir.matarata.robotremote
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import com.android.volley.DefaultRetryPolicy
@@ -12,15 +13,34 @@ import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_setting.*
+import kotlinx.coroutines.*
 import org.json.JSONObject
+import java.io.InputStream
+import java.io.OutputStream
+import java.io.PrintWriter
+import java.lang.Exception
+import java.net.Socket
 
 class SettingActivity : AppCompatActivity() {
 
-    private val nodeMcuURL = "http://192.168.4.1/remote"
+    private lateinit var handler: CoroutineExceptionHandler
+    private var socket: Socket = Socket()
+    private lateinit var myCoroutineRes: Deferred<String>
+    private lateinit var myJsonObject: JSONObject
+    private lateinit var outStream: OutputStream
+    private lateinit var inStream: InputStream
+    private lateinit var printWriter: PrintWriter
+    private var responseString = ""
+    private var availableBytes: Int = 0
+    private lateinit var buffer: ByteArray
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_setting)
+
+        handler = CoroutineExceptionHandler { _, throwable ->
+            Log.d(MainActivity.TAG, "handler: $throwable")
+        }
 
         sa_btn_submit.setOnClickListener {
             when {
@@ -43,13 +63,45 @@ class SettingActivity : AppCompatActivity() {
             }
             //TODO: add a progress loader
             val newPassword = sa_et_newPassword.text.toString()
-            val jsonObj = JSONObject("{\"token\":\"MatarataSecretToken1994\",\"request\":\"changePassword\",\"newPassword\":\"$newPassword\"}")
-            volleyJsonReq(jsonObj)
+            myJsonObject = JSONObject()
+            myJsonObject.put("token", "MatarataSecretToken1994")
+            myJsonObject.put("androidReq", "changePassword")
+            myJsonObject.put("newPassword", newPassword)
+            socketSendReceive(myJsonObject)
         }
 
     }
 
-    private fun volleyJsonReq(jsonObj: JSONObject) {
+    private fun socketSendReceive(jsonObj: JSONObject) = runBlocking(handler) {
+        myCoroutineRes = GlobalScope.async(handler) {
+            try {
+                socket = Socket(MainActivity.socketURL, MainActivity.socketPort)
+                socket.use {
+                    outStream = it.getOutputStream()
+                    printWriter = PrintWriter(outStream)
+                    printWriter.print(jsonObj.toString())
+                    printWriter.flush()
+                    responseString = ""
+                    availableBytes = 0
+                    Thread.sleep(10)
+                    inStream = it.getInputStream()
+                    availableBytes = inStream.available()
+                    if(availableBytes > 0){
+                        buffer = ByteArray(availableBytes)
+                        inStream.read(buffer, 0, availableBytes)
+                        responseString = String(buffer)
+                    }
+                }
+            }catch (e: Exception){
+                Log.d(MainActivity.TAG, e.toString())
+                responseString = ""
+            }
+            responseString
+        }
+        Log.d(MainActivity.TAG, myCoroutineRes.await())
+    }
+
+    /*private fun volleyJsonReq(jsonObj: JSONObject) {
         val requestQueue = Volley.newRequestQueue(this)
         val jsonObjectRequest = JsonObjectRequest(
             Request.Method.POST,
@@ -78,7 +130,7 @@ class SettingActivity : AppCompatActivity() {
             2F
         )
         requestQueue.add(jsonObjectRequest)
-    }
+    }*/
 
     override fun onPause() {
         super.onPause()
