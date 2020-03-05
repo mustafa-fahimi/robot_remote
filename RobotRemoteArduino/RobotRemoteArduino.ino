@@ -1,11 +1,12 @@
 #include <ESP8266WiFi.h>
-#include <WiFiClient.h>
-#include <ESP8266WebServer.h>
+#include <WebSocketsServer.h>
 #include <ArduinoJson.h>
 #include <EEPROM.h>
 
+WebSocketsServer webSocket = WebSocketsServer(80);
+
 //variables decleration
-WiFiServer wifiServer(80);
+WiFiServer wifiServer(8888);
 const char* AP_SSID = "ESP_Remote";
 char AP_PASS[20] = "asakrobatic";
 const char* secretToken = "";
@@ -49,6 +50,49 @@ const int engine2_1 = 12; //D6
 const int engine2_2 = 13; //D7
 const int pushButton = 3; //RX
 
+// Called when receiving any WebSocket message
+void onWebSocketEvent(uint8_t num,
+                      WStype_t type,
+                      uint8_t * payload,
+                      size_t length) {
+ 
+  // Figure out the type of WebSocket event
+  switch(type) {
+ 
+    // Client has disconnected
+    case WStype_DISCONNECTED:
+      Serial.printf("[%u] Disconnected!\n", num);
+      break;
+ 
+    // New client has connected
+    case WStype_CONNECTED:
+      {
+        IPAddress ip = webSocket.remoteIP(num);
+        Serial.printf("[%u] Connection from ", num);
+        Serial.println(ip.toString());
+      }
+      break;
+ 
+    // Echo text message back to client
+    case WStype_TEXT:
+    //for(int i=0; i<=num;i++){
+        Serial.printf("[%u] Text: %s\n", num, payload);
+        webSocket.sendTXT(num, payload);
+      //}
+      break;
+ 
+    // For everything else: do nothing
+    case WStype_BIN:
+    case WStype_ERROR:
+    case WStype_FRAGMENT_TEXT_START:
+    case WStype_FRAGMENT_BIN_START:
+    case WStype_FRAGMENT:
+    case WStype_FRAGMENT_FIN:
+    default:
+      break;
+  }
+}
+
 void setup(void){
   Serial.begin(115200);
   Serial.println("");
@@ -76,29 +120,35 @@ void setup(void){
   (getPassFromEEPROM()).toCharArray(AP_PASS, 20); //get access point password from EEPROM
   WiFi.mode(WIFI_AP);
   WiFi.softAP(AP_SSID, AP_PASS, 5, false, 1); //Start Hotspot removing password will disable security
-  wifiServer.begin();
+  // Start WebSocket server and assign callback
+  webSocket.begin();
+  webSocket.onEvent(onWebSocketEvent);
 }
 
 void(* resetFunc) (void) = 0; //declare reset function @ address 0
 
 void loop(void){
-  client = wifiServer.available();
-  if (client) {
-    Serial.println("Connected");
-    while(client.connected()){
-      readResetBtn();
-      while (client.available() > 0) {
-        tempCharSocketRes = client.read();
-        socketResult += (String) tempCharSocketRes;
-      }
-      if(socketResult != ""){
-        //processJson();
-        socketResult = "";
-      }
-    }
-    Serial.println("Disconnected");
-    client.stop();
-  }
+  // Look for and handle WebSocket data
+  webSocket.loop();
+//  client = wifiServer.available();
+//  if (client) {
+//    Serial.println("Connected");
+//    while(client.connected()){
+//      readResetBtn();
+//      while (client.available() > 0) {
+//        tempCharSocketRes = client.read();
+//        socketResult += (String) tempCharSocketRes;
+//      }
+//      if(socketResult != ""){
+//        Serial.println(socketResult);
+//        client.print("esp khgbsdaf kh swdkf khs dkjsd fkjdflgknerpiotgjhpioer gjl reol tlirwekjm");
+//        //processJson();
+//        socketResult = "";
+//      }
+//    }
+//    Serial.println("Disconnected");
+//    client.stop();
+//  }
   readResetBtn();
 }
 

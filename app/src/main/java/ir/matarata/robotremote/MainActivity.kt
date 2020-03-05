@@ -6,11 +6,15 @@ import android.util.Log
 import android.view.MotionEvent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import io.socket.client.IO
-import io.socket.client.Socket
-import io.socket.emitter.Emitter
+import com.neovisionaries.ws.client.WebSocket
+import com.neovisionaries.ws.client.WebSocketAdapter
+import com.neovisionaries.ws.client.WebSocketFactory
+import com.neovisionaries.ws.client.WebSocketFrame
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.io.InputStream
 import java.io.OutputStream
@@ -31,7 +35,7 @@ class MainActivity : AppCompatActivity() {
     private var mappedStrengthReverse = 0
     private var onPaused = false
     private lateinit var handler: CoroutineExceptionHandler
-    //private var socket: Socket = Socket()
+    private lateinit var mSocket: WebSocket
     private lateinit var myCoroutineRes: Deferred<String>
     private lateinit var myJsonObject: JSONObject
     private lateinit var responseJsonObject: JSONObject
@@ -42,8 +46,6 @@ class MainActivity : AppCompatActivity() {
     private var availableBytes: Int = 0
     private lateinit var buffer: ByteArray
 
-    private lateinit var socket2: io.socket.client.Socket
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -52,17 +54,28 @@ class MainActivity : AppCompatActivity() {
             ma_tv_connectionState.text = getString(R.string.connection_state_problem)
             ma_tv_connectionState.setTextColor(ContextCompat.getColor(this, R.color.red_color))
         }
+        val factory = WebSocketFactory().setConnectionTimeout(3000)
+        mSocket = factory.createSocket("ws://192.168.4.1:80")
+        mSocket.addListener(object : WebSocketAdapter() {
+            override fun onTextMessage(websocket: WebSocket?, text: String?) {
+                Log.d(TAG, "onTextMessage: $text")
+            }
+
+            override fun onDisconnected(websocket: WebSocket?, serverCloseFrame: WebSocketFrame?, clientCloseFrame: WebSocketFrame?, closedByServer: Boolean) {
+                Log.d(TAG, "Disconnected__$closedByServer")
+            }
+        })
 
         ma_btn_gun1.setOnTouchListener { _, event ->
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
-                    socketIOConnect()
+                    myJsonObject = JSONObject()
+                    myJsonObject.put("token", "MatarataSecretToken1994")
+                    myJsonObject.put("androidReq", "gun3")
+                    myJsonObject.put("state", "on")
+                    socketSendReceive(myJsonObject)
 
                     ma_btn_gun1.backgroundColor = ContextCompat.getColor(this, R.color.colorAccent)
-                    /*myJsonObject = JSONObject()
-                    myJsonObject.put("token", "MatarataSecretToken1994")
-                    myJsonObject.put("androidReq", "gun1")
-                    socketSendReceive(myJsonObject)*/
                 }
                 MotionEvent.ACTION_UP -> {
                     ma_btn_gun1.backgroundColor = ContextCompat.getColor(this, R.color.red_color)
@@ -70,7 +83,7 @@ class MainActivity : AppCompatActivity() {
             }
             true
         }
-        /*ma_btn_gun2.setOnTouchListener { _, event ->
+        ma_btn_gun2.setOnTouchListener { _, event ->
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
                     ma_btn_gun2.backgroundColor = ContextCompat.getColor(this, R.color.colorAccent)
@@ -91,7 +104,7 @@ class MainActivity : AppCompatActivity() {
             }
             true
         }
-        ma_btn_gun3.setOnClickListener {
+        /*ma_btn_gun3.setOnClickListener {
             if (!gun3State) {
                 ma_btn_gun3.backgroundColor = ContextCompat.getColor(this, R.color.colorAccent)
                 myJsonObject = JSONObject()
@@ -257,21 +270,34 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun socketIOConnect() = runBlocking(handler){
-        launch {
-            socket2 = IO.socket("http://192.168.4.1")
-            socket2.connect()
-                .on(Socket.EVENT_CONNECT, { Log.d(TAG, "Connected") })
-                .on(Socket.EVENT_DISCONNECT, { Log.d(TAG, "Disonnected") })
-        }
-    }
-
-    /*private fun socketSendReceive(jsonObj: JSONObject) = runBlocking(handler) {
-        myCoroutineRes = GlobalScope.async(handler) {
+    private fun socketSendReceive(jsonObj: JSONObject? = null) {
+        CoroutineScope(handler).launch {
             try {
-                Log.d(TAG, "here")
-                socket = Socket(socketURL, socketPort)
-                socket.apply {
+                if(mSocket.state.toString() == "CLOSED"){
+                    val factory = WebSocketFactory().setConnectionTimeout(3000)
+                    mSocket = factory.createSocket("ws://192.168.4.1:80")
+                    mSocket.addListener(object : WebSocketAdapter() {
+                        override fun onTextMessage(websocket: WebSocket?, text: String?) {
+                            Log.d(TAG, "onTextMessage: $text")
+                        }
+                        override fun onDisconnected(websocket: WebSocket?, serverCloseFrame: WebSocketFrame?, clientCloseFrame: WebSocketFrame?, closedByServer: Boolean) {
+                            Log.d(TAG, "Disconnected__$closedByServer")
+                        }
+                    })
+                }
+                if(mSocket.state.toString() == "CLOSED" || mSocket.state.toString() == "CREATED"){
+                    mSocket.connect()
+                    Log.d(TAG, mSocket.state.toString())
+                }
+                while (true) {
+                    if(mSocket.state.toString() == "CLOSED")
+                        break
+                    if (mSocket.isOpen) {
+                        mSocket.sendText(jsonObj.toString())
+                        break
+                    }
+                }
+                /*socket.apply {
                     outStream = this.getOutputStream()
                     printWriter = PrintWriter(outStream)
                     printWriter.print(jsonObj.toString())
@@ -286,17 +312,17 @@ class MainActivity : AppCompatActivity() {
                         inStream.read(buffer, 0, availableBytes)
                         responseString = String(buffer)
                     }
-                }
+                }*/
             } catch (e: java.lang.Exception) {
                 Log.d(TAG, e.toString())
                 responseString = ""
             }
-            responseString
+            //Log.d(TAG, responseString)
         }
-        processReceivedResult(myCoroutineRes.await())
+        //processReceivedResult(myCoroutineRes.await())
     }
 
-    private fun processReceivedResult(res: String) {
+    /*private fun processReceivedResult(res: String) {
         try {
             responseJsonObject = JSONObject(res)
             if(responseJsonObject.getString("espResult") == "done"){
