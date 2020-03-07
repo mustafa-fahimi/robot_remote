@@ -2,6 +2,7 @@
 #include <WebSocketsServer.h>
 #include <ArduinoJson.h>
 #include <EEPROM.h>
+#include <stdlib.h>
 
 WebSocketsServer webSocket = WebSocketsServer(80);
 
@@ -27,11 +28,12 @@ const unsigned long period = 500;
 const unsigned long periodSocketDis = 1000;
 int timeCounter = 0;
 int timeCounterSocket = 0;
-String voltage;
+float myVoltFloat = 0.00;
+char* myVolt = "";
 int motorStrength;
 int motorStrengthRev;
 char tempCharSocketRes;
-String socketResult = "";
+char socketResult[10];
 String dataToSend = "";
 char charDataToSend[50];
 WiFiClient client;
@@ -75,10 +77,9 @@ void onWebSocketEvent(uint8_t num,
  
     // Echo text message back to client
     case WStype_TEXT:
-    //for(int i=0; i<=num;i++){
-        Serial.printf("[%u] Text: %s\n", num, payload);
-        webSocket.sendTXT(num, payload);
-      //}
+      sprintf(socketResult, "%s", payload);
+      processJson();
+      webSocket.sendTXT(num, dataToSend);
       break;
  
     // For everything else: do nothing
@@ -130,31 +131,12 @@ void(* resetFunc) (void) = 0; //declare reset function @ address 0
 void loop(void){
   // Look for and handle WebSocket data
   webSocket.loop();
-//  client = wifiServer.available();
-//  if (client) {
-//    Serial.println("Connected");
-//    while(client.connected()){
-//      readResetBtn();
-//      while (client.available() > 0) {
-//        tempCharSocketRes = client.read();
-//        socketResult += (String) tempCharSocketRes;
-//      }
-//      if(socketResult != ""){
-//        Serial.println(socketResult);
-//        client.print("esp khgbsdaf kh swdkf khs dkjsd fkjdflgknerpiotgjhpioer gjl reol tlirwekjm");
-//        //processJson();
-//        socketResult = "";
-//      }
-//    }
-//    Serial.println("Disconnected");
-//    client.stop();
-//  }
   readResetBtn();
 }
 
 void processJson(){
   jsonDocRecv.clear();
-  error = deserializeJson(jsonDocRecv, socketResult);
+  error = deserializeJson(jsonDocRecv, (String)socketResult);
   if(error){
     sendStateToAndroid("fail");
     return;
@@ -165,30 +147,31 @@ void processJson(){
   reqNewPass = jsonDocRecv["newPassword"];
   if(((String)secretToken).equals("MatarataSecretToken1994")){
     if(((String)reqType).equals("gun1")){
-      voltage = (String) (((analogRead(A0) * 3.3) / 1023.0) / 0.12);
-      sendDataToAndroid("done", voltage);
+      myVoltFloat = ((analogRead(A0) * 3.3) / 1023.0) / 0.12;
+      myVoltFloat = roundf(myVoltFloat*100.0)/100.0;
       digitalWrite(gun1, HIGH);
-      delay(200);
+      delay(10);
       digitalWrite(gun1, LOW);
+      sendDataToAndroid("done", myVoltFloat);
     }else if(((String)reqType).equals("gun2")){
       if(((String)reqState).equals("on")){
-        sendStateToAndroid("done");
         digitalWrite(gun2, HIGH);
-      }else{
         sendStateToAndroid("done");
+      }else{
         digitalWrite(gun2, LOW);
+        sendStateToAndroid("done");
       }
     }else if(((String)reqType).equals("gun3")){
       if(((String)reqState).equals("on")){
-        sendStateToAndroid("done");
         digitalWrite(gun3, HIGH);
-      }else{
         sendStateToAndroid("done");
+      }else{
         digitalWrite(gun3, LOW);
+        sendStateToAndroid("done");
       }
     }else if(String(reqType).equals("changePassword")){
-      sendStateToAndroid("done");
       changePassEEPROM();
+      sendStateToAndroid("done");
     }
   }else{
     sendStateToAndroid("fail");
@@ -200,16 +183,14 @@ void sendStateToAndroid(String state){
   jsonDocSend.clear();
   jsonDocSend["espResult"] = state;
   serializeJson(jsonDocSend, dataToSend);
-  client.println(dataToSend);
 }
 
-void sendDataToAndroid(String state, String voltage){
+void sendDataToAndroid(String state, float voltage){
   dataToSend = "";
   jsonDocSend.clear();
   jsonDocSend["espResult"] = state;
   jsonDocSend["voltage"] = voltage;
   serializeJson(jsonDocSend, dataToSend);
-  client.println(dataToSend);
 }
 
 void changePassEEPROM(){
