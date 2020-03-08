@@ -33,12 +33,13 @@ char* myVolt = "";
 int motorStrength;
 int motorStrengthRev;
 char tempCharSocketRes;
-char socketResult[10];
+char socketResult[200];
 String dataToSend = "";
-char charDataToSend[50];
+char charDataToSend[80];
+uint8_t globalSocketNum;
 WiFiClient client;
-DynamicJsonDocument jsonDocRecv(120);
-DynamicJsonDocument jsonDocSend(120);
+DynamicJsonDocument jsonDocRecv(250);
+DynamicJsonDocument jsonDocSend(250);
 DeserializationError error;
 
 //Pins decleration
@@ -60,29 +61,21 @@ void onWebSocketEvent(uint8_t num,
  
   // Figure out the type of WebSocket event
   switch(type) {
- 
-    // Client has disconnected
     case WStype_DISCONNECTED:
-      Serial.printf("[%u] Disconnected!\n", num);
+      //Serial.printf("[%u] Disconnected!\n", num);
       break;
- 
-    // New client has connected
     case WStype_CONNECTED:
       {
-        IPAddress ip = webSocket.remoteIP(num);
-        Serial.printf("[%u] Connection from ", num);
-        Serial.println(ip.toString());
+//        IPAddress ip = webSocket.remoteIP(num);
+//        Serial.printf("[%u] Connection from ", num);
+//        Serial.println(ip.toString());
       }
       break;
- 
-    // Echo text message back to client
     case WStype_TEXT:
+      globalSocketNum = num;
       sprintf(socketResult, "%s", payload);
       processJson();
-      webSocket.sendTXT(num, dataToSend);
       break;
- 
-    // For everything else: do nothing
     case WStype_BIN:
     case WStype_ERROR:
     case WStype_FRAGMENT_TEXT_START:
@@ -143,35 +136,76 @@ void processJson(){
   }
   secretToken = jsonDocRecv["token"];
   reqType = jsonDocRecv["androidReq"];
-  reqState = jsonDocRecv["state"];
-  reqNewPass = jsonDocRecv["newPassword"];
   if(((String)secretToken).equals("MatarataSecretToken1994")){
-    if(((String)reqType).equals("gun1")){
+    if(((String)reqType).equals("motor_left")){
+      reqStrengthRev = jsonDocRecv["strengthRev"];
+      motorStrengthRev = ((String)reqStrengthRev).toInt();
+      digitalWrite(engine1_1, HIGH);
+      analogWrite(engine1_2, motorStrengthRev);
+      analogWrite(engine2_1, motorStrengthRev);
+      digitalWrite(engine2_2, HIGH);
+    }else if(((String)reqType).equals("motor_right")){
+      reqStrength = jsonDocRecv["strength"];
+      motorStrength = ((String)reqStrength).toInt();
+      digitalWrite(engine1_1, LOW);
+      analogWrite(engine1_2, motorStrength);
+      analogWrite(engine2_1, motorStrength);
+      digitalWrite(engine2_2, LOW);
+    }else if(((String)reqType).equals("motor_forward")){
+      reqStrength = jsonDocRecv["strength"];
+      reqStrengthRev = jsonDocRecv["strengthRev"];
+      motorStrength = ((String)reqStrength).toInt();
+      motorStrengthRev = ((String)reqStrengthRev).toInt();
+      digitalWrite(engine1_1, HIGH);
+      analogWrite(engine1_2, motorStrengthRev);
+      analogWrite(engine2_1, motorStrength);
+      digitalWrite(engine2_2, LOW);
+    }else if(((String)reqType).equals("motor_backward")){
+      reqStrength = jsonDocRecv["strength"];
+      reqStrengthRev = jsonDocRecv["strengthRev"];
+      motorStrength = ((String)reqStrength).toInt();
+      motorStrengthRev = ((String)reqStrengthRev).toInt();
+      digitalWrite(engine1_1, LOW);
+      analogWrite(engine1_2, motorStrength);
+      analogWrite(engine2_1, motorStrengthRev);
+      digitalWrite(engine2_2, HIGH);
+    }else if(((String)reqType).equals("motor_off")){
       myVoltFloat = ((analogRead(A0) * 3.3) / 1023.0) / 0.12;
       myVoltFloat = roundf(myVoltFloat*100.0)/100.0;
+      sendDataToAndroid("done", myVoltFloat);
+      digitalWrite(engine1_1, LOW);
+      analogWrite(engine1_2, 0);
+      analogWrite(engine2_1, 0);
+      digitalWrite(engine2_2, LOW);
+    }else if(((String)reqType).equals("gun1")){
       digitalWrite(gun1, HIGH);
       delay(10);
       digitalWrite(gun1, LOW);
-      sendDataToAndroid("done", myVoltFloat);
     }else if(((String)reqType).equals("gun2")){
+      reqState = jsonDocRecv["state"];
+      myVoltFloat = ((analogRead(A0) * 3.3) / 1023.0) / 0.12;
+      myVoltFloat = roundf(myVoltFloat*100.0)/100.0;
       if(((String)reqState).equals("on")){
         digitalWrite(gun2, HIGH);
-        sendStateToAndroid("done");
+        sendDataToAndroid("done", myVoltFloat);
       }else{
         digitalWrite(gun2, LOW);
-        sendStateToAndroid("done");
       }
     }else if(((String)reqType).equals("gun3")){
+      reqState = jsonDocRecv["state"];
+      myVoltFloat = ((analogRead(A0) * 3.3) / 1023.0) / 0.12;
+      myVoltFloat = roundf(myVoltFloat*100.0)/100.0;
       if(((String)reqState).equals("on")){
         digitalWrite(gun3, HIGH);
-        sendStateToAndroid("done");
+        sendDataToAndroid("done", myVoltFloat);
       }else{
         digitalWrite(gun3, LOW);
         sendStateToAndroid("done");
       }
     }else if(String(reqType).equals("changePassword")){
-      changePassEEPROM();
+      reqNewPass = jsonDocRecv["newPassword"];
       sendStateToAndroid("done");
+      changePassEEPROM();
     }
   }else{
     sendStateToAndroid("fail");
@@ -183,6 +217,7 @@ void sendStateToAndroid(String state){
   jsonDocSend.clear();
   jsonDocSend["espResult"] = state;
   serializeJson(jsonDocSend, dataToSend);
+  webSocket.sendTXT(globalSocketNum, dataToSend);
 }
 
 void sendDataToAndroid(String state, float voltage){
@@ -191,6 +226,7 @@ void sendDataToAndroid(String state, float voltage){
   jsonDocSend["espResult"] = state;
   jsonDocSend["voltage"] = voltage;
   serializeJson(jsonDocSend, dataToSend);
+  webSocket.sendTXT(globalSocketNum, dataToSend);
 }
 
 void changePassEEPROM(){
@@ -205,97 +241,6 @@ void changePassEEPROM(){
   delay(1500);
   resetFunc(); //call reset  54
 }
-
-//void switchRelay(){
-//  //Runs if connected user sended some data
-//  if(server.arg(0) != NULL){
-//    
-//    JsonObject& root = jsonBuffer.parseObject(server.arg(0));
-//    if (!root.success()) {
-//      server.send(200, "application/json", "{\"result\":\"NodeMcuError\"}");
-//    }else if(root.success()){
-//      secretToken = root["token"];
-//      if(String(secretToken).equals("MatarataSecretToken1994")){
-//        reqType = root["request"];
-//        reqStrength = root["strength"];
-//        reqStrengthRev = root["strengthRev"];
-//        motorStrength = ((String)reqStrength).toInt();
-//        motorStrengthRev = (( tring)reqStrengthRev).toInt();
-//        if(String(reqType).equals("motor_left")){
-//          server.send(200, "application/json", "{\"result\":\"done\"}");
-//          digitalWrite(engine1_1, HIGH);
-//          analogWrite(engine1_2, motorStrengthRev);
-//          analogWrite(engine2_1, motorStrengthRev);
-//          digitalWrite(engine2_2, HIGH);
-//        }else if(String(reqType).equals("motor_right")){
-//          server.send(200, "application/json", "{\"result\":\"done\"}");
-//          digitalWrite(engine1_1, LOW);
-//          analogWrite(engine1_2, motorStrength);
-//          analogWrite(engine2_1, motorStrength);
-//          digitalWrite(engine2_2, LOW);
-//        }else if(String(reqType).equals("motor_forward")){
-//          voltage = ((analogRead(A0) * 3.3) / 1023.0) / 0.12;
-//          server.send(200, "application/json", "{\"result\":\"done\", \"voltage\":\"" + (String) voltage + "\"}");
-//          digitalWrite(engine1_1, HIGH);
-//          analogWrite(engine1_2, motorStrengthRev);
-//          analogWrite(engine2_1, motorStrength);
-//          digitalWrite(engine2_2, LOW);
-//        }else if(String(reqType).equals("motor_backward")){
-//          server.send(200, "application/json", "{\"result\":\"done\"}");
-//          digitalWrite(engine1_1, LOW);
-//          analogWrite(engine1_2, motorStrength);
-//          analogWrite(engine2_1, motorStrengthRev);
-//          digitalWrite(engine2_2, HIGH);
-//        }else if(String(reqType).equals("motor_off")){
-//          server.send(200, "application/json", "{\"result\":\"done\"}");
-//          digitalWrite(engine1_1, LOW);
-//          analogWrite(engine1_2, 0);
-//          analogWrite(engine2_1, 0);
-//          digitalWrite(engine2_2, LOW);
-//        }else if(String(reqType).equals("gun1")){
-//          voltage = ((analogRead(A0) * 3.3) / 1023.0) / 0.12;
-//          server.send(200, "application/json", "{\"result\":\"done\", \"voltage\":\"" + (String) voltage + "\"}");
-//          digitalWrite(gun1, HIGH);
-//          delay(400);
-//          digitalWrite(gun1, LOW);
-//        }else if(String(reqType).equals("gun2")){
-//          server.send(200, "application/json", "{\"result\":\"done\"}");
-//          reqState = root["state"];
-//          if(String(reqState).equals("on")){
-//            digitalWrite(gun2, HIGH);
-//          }else if(String(reqState).equals("off")){
-//            digitalWrite(gun2, LOW);
-//          }
-//        }else if(String(reqType).equals("gun3")){
-//          server.send(200, "application/json", "{\"result\":\"done\"}");
-//          reqState = root["state"];
-//          if(String(reqState).equals("on")){
-//            digitalWrite(gun3, HIGH);
-//          }else if(String(reqState).equals("off")){
-//            digitalWrite(gun3, LOW);
-//          }
-//        }else if(String(reqType).equals("changePassword")){
-//          server.send(200, "application/json", "{\"result\":\"done\"}");
-//          reqNewPass = root["newPassword"];
-//          reqNewPassLength = strlen(reqNewPass);
-//          EEPROM.write(eepromAddressCount, reqNewPassLength);
-//          int x = 0;
-//          for(int i=eepromAddress; i < (eepromAddress + reqNewPassLength); i++){
-//            EEPROM.write(i, reqNewPass[x]);
-//            x++;
-//          }
-//          EEPROM.commit();
-//          delay(1500);
-//          resetFunc(); //call reset 
-//        }else{
-//          server.send(200, "application/json", "{\"result\":\"NodeMcuError\"}");
-//        }
-//      }else{
-//        server.send(200, "application/json", "{\"result\":\"WrongToken\"}");
-//      }
-//    }
-//  }
-//}
 
 String getPassFromEEPROM(){
   eepromGetValueCount = EEPROM.read(eepromAddressCount);
