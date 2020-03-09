@@ -1,45 +1,40 @@
 package ir.matarata.robotremote
 
+import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.android.volley.DefaultRetryPolicy
-import com.android.volley.Request
-import com.android.volley.Response
-import com.android.volley.toolbox.JsonObjectRequest
-import com.android.volley.toolbox.Volley
+import com.neovisionaries.ws.client.WebSocket
+import com.neovisionaries.ws.client.WebSocketAdapter
+import com.neovisionaries.ws.client.WebSocketFactory
+import com.neovisionaries.ws.client.WebSocketFrame
+import dmax.dialog.SpotsDialog
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_setting.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import org.json.JSONObject
-import java.io.InputStream
-import java.io.OutputStream
-import java.io.PrintWriter
-import java.lang.Exception
-import java.net.Socket
 
 class SettingActivity : AppCompatActivity() {
 
     private lateinit var handler: CoroutineExceptionHandler
-    private var socket: Socket = Socket()
-    private lateinit var myCoroutineRes: Deferred<String>
+    private lateinit var mSocket: WebSocket
     private lateinit var myJsonObject: JSONObject
-    private lateinit var outStream: OutputStream
-    private lateinit var inStream: InputStream
-    private lateinit var printWriter: PrintWriter
-    private var responseString = ""
-    private var availableBytes: Int = 0
-    private lateinit var buffer: ByteArray
+    private lateinit var responseJsonObject: JSONObject
+    private val socketURL = "ws://192.168.4.1:80"
+    private lateinit var websSocketFactory: WebSocketFactory
+    private lateinit var alertDialog: AlertDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_setting)
 
-        handler = CoroutineExceptionHandler { _, throwable ->
-            Log.d(MainActivity.TAG, "handler: $throwable")
+        handler = CoroutineExceptionHandler { _, Throwable ->
+            Log.d(MainActivity.TAG, Throwable.toString())
         }
 
         sa_btn_submit.setOnClickListener {
@@ -62,6 +57,7 @@ class SettingActivity : AppCompatActivity() {
                 }
             }
             //TODO: add a progress loader
+            progressDialog(this)
             val newPassword = sa_et_newPassword.text.toString()
             myJsonObject = JSONObject()
             myJsonObject.put("token", "MatarataSecretToken1994")
@@ -72,78 +68,82 @@ class SettingActivity : AppCompatActivity() {
 
     }
 
-    private fun socketSendReceive(jsonObj: JSONObject) = runBlocking(handler) {
-        myCoroutineRes = GlobalScope.async(handler) {
-            try {
-                socket = Socket(MainActivity.socketURL, MainActivity.socketPort)
-                socket.use {
-                    outStream = it.getOutputStream()
-                    printWriter = PrintWriter(outStream)
-                    printWriter.print(jsonObj.toString())
-                    printWriter.flush()
-                    responseString = ""
-                    availableBytes = 0
-                    Thread.sleep(10)
-                    inStream = it.getInputStream()
-                    availableBytes = inStream.available()
-                    if(availableBytes > 0){
-                        buffer = ByteArray(availableBytes)
-                        inStream.read(buffer, 0, availableBytes)
-                        responseString = String(buffer)
-                    }
-                }
-            }catch (e: Exception){
-                Log.d(MainActivity.TAG, e.toString())
-                responseString = ""
+    private fun socketCreate() {
+        websSocketFactory = WebSocketFactory().setConnectionTimeout(3000)
+        mSocket = websSocketFactory.createSocket(socketURL)
+        mSocket.addListener(object : WebSocketAdapter() {
+            override fun onTextMessage(websocket: WebSocket?, text: String?) {
+                if (text.toString() != "null")
+                    processReceivedResult(text.toString())
             }
-            responseString
-        }
-        Log.d(MainActivity.TAG, myCoroutineRes.await())
+
+            override fun onDisconnected(websocket: WebSocket?, serverCloseFrame: WebSocketFrame?, clientCloseFrame: WebSocketFrame?, closedByServer: Boolean) {
+                mSocket.sendClose()
+                mSocket.disconnect()
+            }
+        })
     }
 
-    /*private fun volleyJsonReq(jsonObj: JSONObject) {
-        val requestQueue = Volley.newRequestQueue(this)
-        val jsonObjectRequest = JsonObjectRequest(
-            Request.Method.POST,
-            nodeMcuURL,
-            jsonObj,
-            Response.Listener<JSONObject?> { response ->
-                val res: String? = response?.getString("result")
-                if (res.equals("done")) {
-                    //TODO: show alert dialog for success
-                    sa_et_newPassword.text?.clear()
-                    sa_et_newPasswordAgain.text?.clear()
-                    Toast.makeText(this, "done",Toast.LENGTH_SHORT).show()
-                } else {
-                    //TODO: show alert dialog for failure
-                    Toast.makeText(this, response.toString(),Toast.LENGTH_SHORT).show()
-                }
-            },
-            Response.ErrorListener {
-                //TODO: show alert dialog for failure
-                Toast.makeText(this, it.toString(),Toast.LENGTH_SHORT).show()
+    private fun socketSendReceive(jsonObj: JSONObject? = null) {
+        if (mSocket.state.toString() == "CLOSED") {
+            socketCreate()
+        }
+        CoroutineScope(handler).launch {
+            if (mSocket.state.toString() == "CLOSED" || mSocket.state.toString() == "CREATED") {
+                mSocket.connect()
             }
-        )
-        jsonObjectRequest.retryPolicy = DefaultRetryPolicy(
-            1000,
-            1,
-            2F
-        )
-        requestQueue.add(jsonObjectRequest)
-    }*/
+            while (true) {
+                if (mSocket.isOpen) {
+                    mSocket.sendText(jsonObj.toString())
+                    break
+                }
+            }
+        }
+    }
+
+    private fun processReceivedResult(res: String) {
+        try {
+            responseJsonObject = JSONObject(res)
+            if (responseJsonObject.getString("espResult") == "done") {
+                Thread.sleep(1500)
+                alertDialog.cancel()
+                sa_et_newPassword.text?.clear()
+                sa_et_newPasswordAgain.text?.clear()
+                //TODO: show alert dialog for success
+            } else if (responseJsonObject.getString("espResult") == "fail") {
+                //TODO: show alert dialog for failure
+            }
+        } catch (e: Exception) {
+            //TODO: show alert dialog for failure
+        }
+    }
+
+    private fun progressDialog(context: Context) {
+        alertDialog = SpotsDialog.Builder()
+            .setContext(context)
+            .setMessage("منتظر بمانید ...")
+            .setCancelable(false)
+            .build()
+            .apply {
+                show()
+            }
+    }
 
     override fun onPause() {
         super.onPause()
+        mSocket.disconnect()
         finish()
     }
 
     override fun onStop() {
         super.onStop()
+        mSocket.disconnect()
         finish()
     }
 
     override fun onBackPressed() {
         super.onBackPressed()
+        mSocket.disconnect()
         intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
         finish()

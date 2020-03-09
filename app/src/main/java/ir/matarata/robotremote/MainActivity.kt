@@ -1,9 +1,13 @@
 package ir.matarata.robotremote
 
+import android.app.Activity
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import android.view.MotionEvent
+import android.view.Window
+import android.view.WindowManager
+import androidx.annotation.ColorRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.neovisionaries.ws.client.WebSocket
@@ -13,19 +17,13 @@ import com.neovisionaries.ws.client.WebSocketFrame
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.launch
 import org.json.JSONObject
-import java.io.InputStream
-import java.io.OutputStream
-import java.io.PrintWriter
 
 
 class MainActivity : AppCompatActivity() {
 
     companion object {
-        const val socketURL = "192.168.4.1"
-        const val socketPort = 8888
         const val TAG = "MATATAG"
     }
 
@@ -46,6 +44,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        setSystemBarColor(this, R.color.darker_blue)
         socketCreate()
         handler = CoroutineExceptionHandler { _, _ ->
             ma_tv_connectionState.text = getString(R.string.connection_state_problem)
@@ -107,6 +106,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
         ma_btn_settings.setOnClickListener {
+            mSocket.disconnect()
             intent = Intent(this, SettingActivity::class.java)
             startActivity(intent)
             finish()
@@ -146,14 +146,15 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun socketCreate(){
+    private fun socketCreate() {
         websSocketFactory = WebSocketFactory().setConnectionTimeout(3000)
         mSocket = websSocketFactory.createSocket(socketURL)
         mSocket.addListener(object : WebSocketAdapter() {
             override fun onTextMessage(websocket: WebSocket?, text: String?) {
-                if(text.toString() != "null")
+                if (text.toString() != "null")
                     processReceivedResult(text.toString())
             }
+
             override fun onDisconnected(websocket: WebSocket?, serverCloseFrame: WebSocketFrame?, clientCloseFrame: WebSocketFrame?, closedByServer: Boolean) {
                 mSocket.sendClose()
                 mSocket.disconnect()
@@ -162,23 +163,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun socketSendReceive(jsonObj: JSONObject? = null) {
-        if(mSocket.state.toString() == "CLOSED"){
+        if (mSocket.state.toString() == "CLOSED") {
             socketCreate()
         }
         CoroutineScope(handler).launch {
-            try {
-                if(mSocket.state.toString() == "CLOSED" || mSocket.state.toString() == "CREATED"){
-                    mSocket.connect()
+            if (mSocket.state.toString() == "CLOSED" || mSocket.state.toString() == "CREATED") {
+                mSocket.connect()
+            }
+            while (true) {
+                if (mSocket.state.toString() == "CLOSED")
+                    break
+                if (mSocket.isOpen) {
+                    mSocket.sendText(jsonObj.toString())
+                    break
                 }
-                while (true) {
-                    if(mSocket.state.toString() == "CLOSED")
-                        break
-                    if (mSocket.isOpen) {
-                        mSocket.sendText(jsonObj.toString())
-                        break
-                    }
-                }
-            } catch (e: java.lang.Exception) {
             }
         }
     }
@@ -186,11 +184,11 @@ class MainActivity : AppCompatActivity() {
     private fun processReceivedResult(res: String) {
         try {
             responseJsonObject = JSONObject(res)
-            if(responseJsonObject.getString("espResult") == "done"){
+            if (responseJsonObject.getString("espResult") == "done") {
                 ma_tv_connectionState.text = getString(R.string.connection_state_connected)
                 ma_tv_connectionState.setTextColor(ContextCompat.getColor(this, R.color.colorAccent))
-                when(myJsonObject.getString("androidReq")){
-                    "gun2" ->{
+                when (myJsonObject.getString("androidReq")) {
+                    "gun2" -> {
                         tempVoltage = responseJsonObject.getDouble("voltage")
                         ma_tv_batteryVoltage.text = "ولتاژ باتری موتور: $tempVoltage ولت"
                     }
@@ -199,15 +197,15 @@ class MainActivity : AppCompatActivity() {
                             gun3State = true //its on
                             tempVoltage = responseJsonObject.getDouble("voltage")
                             ma_tv_batteryVoltage.text = "ولتاژ باتری موتور: $tempVoltage ولت"
-                        }else if (myJsonObject.getString("state") == "off") {
+                        } else if (myJsonObject.getString("state") == "off") {
                             gun3State = false //its off
                         }
                     }
                 }
-            }else if(responseJsonObject.getString("espResult") == "fail"){
+            } else if (responseJsonObject.getString("espResult") == "fail") {
                 ma_tv_connectionState.text = getString(R.string.connection_state_problem)
                 ma_tv_connectionState.setTextColor(ContextCompat.getColor(this, R.color.red_color))
-                if(myJsonObject.getString("androidReq") == "gun3") {
+                if (myJsonObject.getString("androidReq") == "gun3") {
                     gun3State = false
                     ma_btn_gun3.backgroundColor = ContextCompat.getColor(this, R.color.red_color)
                 }
@@ -215,7 +213,7 @@ class MainActivity : AppCompatActivity() {
         } catch (e: java.lang.Exception) {
             ma_tv_connectionState.text = getString(R.string.connection_state_problem)
             ma_tv_connectionState.setTextColor(ContextCompat.getColor(this, R.color.red_color))
-            if(myJsonObject.getString("androidReq") == "gun3") {
+            if (myJsonObject.getString("androidReq") == "gun3") {
                 gun3State = false
                 ma_btn_gun3.backgroundColor = ContextCompat.getColor(this, R.color.red_color)
             }
@@ -230,13 +228,25 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    //Change the color of system bar in Apis above lollipop
+    private fun setSystemBarColor(act: Activity, @ColorRes color: Int) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            val window: Window = act.window
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+            window.statusBarColor = ContextCompat.getColor(this, color)
+        }
+    }
+
     override fun onPause() {
         onPaused = true
+        mSocket.disconnect()
         super.onPause()
     }
 
     override fun onStop() {
         onPaused = true
+        mSocket.disconnect()
         super.onStop()
     }
 

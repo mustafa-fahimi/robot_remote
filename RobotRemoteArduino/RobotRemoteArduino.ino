@@ -4,54 +4,59 @@
 #include <EEPROM.h>
 #include <stdlib.h>
 
+#define gun1 5
+#define gun2 4
+#define gun3 15
+#define engine1_1 11
+#define engine1_2 7
+#define engine1_enable 14
+#define engine2_1 6
+#define engine2_2 8
+#define engine2_enable 12
+#define pushButton 3
+
 WebSocketsServer webSocket = WebSocketsServer(80);
 
 //variables decleration
-WiFiServer wifiServer(8888);
 const char* AP_SSID = "ESP_Remote";
-char AP_PASS[20] = "asakrobatic";
 const char* secretToken = "";
 const char* reqType = "";
 const char* reqState = "";
 const char* reqStrength = "";
 const char* reqStrengthRev = "";
-const char* reqNewPass;
-int reqNewPassLength;
-int eepromAddressCount = 10; //EEPROM Address
-int eepromAddress = 20; //EEPROM Address
+const char* reqNewPass = "";
+char* AP_PASS;
+char* socketResult;
+String dataToSend = "";
+float myVoltFloat = 0.00;
 byte eepromGetValue;
 byte eepromGetValueCount;
-int buttonState = 0;
 unsigned long startMillis; 
 unsigned long currentMillis;
-const unsigned long period = 500;
-const unsigned long periodSocketDis = 1000;
+unsigned long currentMillisSocket;
+unsigned long period = 500;
+int reqNewPassLength;
+int eepromAddressCount = 10; //EEPROM Address for storing password length
+int eepromAddress = 25; //EEPROM Address for storing password
+int buttonState = 0;
 int timeCounter = 0;
 int timeCounterSocket = 0;
-float myVoltFloat = 0.00;
-char* myVolt = "";
-int motorStrength;
-int motorStrengthRev;
-char tempCharSocketRes;
-char socketResult[200];
-String dataToSend = "";
-char charDataToSend[80];
+int motorStrength = 0;
+int motorStrengthRev = 0;
 uint8_t globalSocketNum;
-WiFiClient client;
 DynamicJsonDocument jsonDocRecv(250);
 DynamicJsonDocument jsonDocSend(250);
 DeserializationError error;
 
 //Pins decleration
-//TODO: Use #define instead
-const int gun1 = 5; //D1
-const int gun2 = 4; //D2
-const int gun3 = 15; //D8
-const int engine1_1 = 16; //D0
-const int engine1_2 = 14; //D5
-const int engine2_1 = 12; //D6
-const int engine2_2 = 13; //D7
-const int pushButton = 3; //RX
+//const int gun1 = 5; //D1
+//const int gun2 = 4; //D2
+//const int gun3 = 15; //D8
+//const int engine1_1 = 16; //D0
+//const int engine1_2 = 14; //D5
+//const int engine2_1 = 12; //D6
+//const int engine2_2 = 13; //D7
+//const int pushButton = 3; //RX
 
 // Called when receiving any WebSocket message
 void onWebSocketEvent(uint8_t num,
@@ -61,21 +66,14 @@ void onWebSocketEvent(uint8_t num,
  
   // Figure out the type of WebSocket event
   switch(type) {
-    case WStype_DISCONNECTED:
-      //Serial.printf("[%u] Disconnected!\n", num);
-      break;
-    case WStype_CONNECTED:
-      {
-//        IPAddress ip = webSocket.remoteIP(num);
-//        Serial.printf("[%u] Connection from ", num);
-//        Serial.println(ip.toString());
-      }
-      break;
     case WStype_TEXT:
+      timeCounterSocket = 0;
       globalSocketNum = num;
       sprintf(socketResult, "%s", payload);
       processJson();
       break;
+    case WStype_CONNECTED:
+    case WStype_DISCONNECTED:
     case WStype_BIN:
     case WStype_ERROR:
     case WStype_FRAGMENT_TEXT_START:
@@ -128,6 +126,7 @@ void loop(void){
 }
 
 void processJson(){
+  autoSocketDisconnect();
   jsonDocRecv.clear();
   error = deserializeJson(jsonDocRecv, (String)socketResult);
   if(error){
@@ -276,4 +275,25 @@ void readResetBtn(){
   }else if(buttonState == HIGH){
     timeCounter = 0;
   }
+}
+
+void autoSocketDisconnect(){
+  currentMillisSocket = millis();
+    if(currentMillis - startMillis >= period){
+      startMillis = currentMillis;
+      timeCounter++;
+    }
+    if(timeCounter == 6){
+      timeCounter = 0;
+      char defaultPass[12] = "asakrobatic";
+      EEPROM.write(eepromAddressCount, 11);
+      int x = 0;
+      for(int i=eepromAddress; i < (eepromAddress + 11); i++){
+        EEPROM.write(i, defaultPass[x]);
+        x++;
+      }
+      EEPROM.commit();
+      delay(1000);
+      resetFunc(); //call reset
+    }
 }

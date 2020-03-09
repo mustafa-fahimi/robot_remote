@@ -6,6 +6,7 @@
     xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/dark_blue"
     tools:context=".MainActivity">
 
     <io.github.controlwear.virtual.joystick.android.JoystickView
@@ -17,11 +18,12 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintHorizontal_bias="0.85"
-        android:background="@drawable/green_joystick_bg"
+        android:background="@drawable/nice_joystick_bg_arrows"
         custom:JV_borderWidth="0dp"
-        custom:JV_buttonColor="@color/white_color"
-        custom:JV_buttonSizeRatio="20%"
-        custom:JV_fixedCenter="false" />
+        app:JV_buttonImage="@drawable/nice_joystick_roller"
+        app:JV_autoReCenterButton="true"
+        custom:JV_buttonSizeRatio="25%"
+        custom:JV_fixedCenter="true" />
 
     <com.ornach.nobobutton.NoboButton
         android:id="@+id/ma_btn_gun1"
@@ -33,7 +35,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintHorizontal_bias="0.2"
-        app:nb_backgroundColor="@color/red_color"
+        app:nb_backgroundColor="@color/dark_red_color"
         app:nb_borderColor="@color/white_color"
         app:nb_borderWidth="2dp"
         app:nb_focusColor="@color/white_color"
@@ -51,7 +53,7 @@
         app:layout_constraintEnd_toEndOf="@+id/ma_btn_gun1"
         app:layout_constraintStart_toStartOf="@+id/ma_btn_gun1"
         app:layout_constraintTop_toBottomOf="@+id/ma_btn_gun1"
-        app:nb_backgroundColor="@color/red_color"
+        app:nb_backgroundColor="@color/dark_red_color"
         app:nb_borderColor="@color/white_color"
         app:nb_borderWidth="2dp"
         app:nb_focusColor="@color/white_color"
@@ -70,7 +72,7 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="@+id/ma_btn_gun1"
         app:layout_constraintTop_toBottomOf="@+id/ma_btn_gun2"
-        app:nb_backgroundColor="@color/red_color"
+        app:nb_backgroundColor="@color/dark_red_color"
         app:nb_borderColor="@color/white_color"
         app:nb_borderWidth="2dp"
         app:nb_focusColor="@color/white_color"
@@ -85,6 +87,7 @@
         android:layout_height="wrap_content"
         android:text="@string/connection_state_unknown"
         android:textSize="19sp"
+        android:textColor="@color/white_color"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -98,6 +101,7 @@
         android:textStyle="bold"
         android:gravity="right"
         android:textSize="21sp"
+        android:textColor="@color/white_color"
         app:layout_constraintBottom_toTopOf="@+id/ma_btn_gun1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
