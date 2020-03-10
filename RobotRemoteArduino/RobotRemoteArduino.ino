@@ -2,18 +2,17 @@
 #include <WebSocketsServer.h>
 #include <ArduinoJson.h>
 #include <EEPROM.h>
-#include <stdlib.h>
 
-#define gun1 5
-#define gun2 4
-#define gun3 15
-#define engine1_1 11
-#define engine1_2 7
-#define engine1_enable 14
-#define engine2_1 6
-#define engine2_2 8
-#define engine2_enable 12
-#define pushButton 3
+//#define gun1 5
+//#define gun2 4
+//#define gun3 15
+//#define engine1_1 11
+//#define engine1_2 7
+//#define engine1_enable 14
+//#define engine2_1 6
+//#define engine2_2 8
+//#define engine2_enable 12
+//#define pushButton 3
 
 WebSocketsServer webSocket = WebSocketsServer(80);
 
@@ -25,8 +24,8 @@ const char* reqState = "";
 const char* reqStrength = "";
 const char* reqStrengthRev = "";
 const char* reqNewPass = "";
-char* AP_PASS;
-char* socketResult;
+char AP_PASS[30] = "asakrobatic";
+char socketResult[200];
 String dataToSend = "";
 float myVoltFloat = 0.00;
 byte eepromGetValue;
@@ -49,14 +48,16 @@ DynamicJsonDocument jsonDocSend(250);
 DeserializationError error;
 
 //Pins decleration
-//const int gun1 = 5; //D1
-//const int gun2 = 4; //D2
-//const int gun3 = 15; //D8
-//const int engine1_1 = 16; //D0
-//const int engine1_2 = 14; //D5
-//const int engine2_1 = 12; //D6
-//const int engine2_2 = 13; //D7
-//const int pushButton = 3; //RX
+const int gun1 = 5; //
+const int gun2 = 4; //
+const int gun3 = 15; //
+const int engine1_1 = 16; //
+const int engine1_2 = 13; //
+const int engine1_enable = 14; //
+const int engine2_1 = 1; //
+const int engine2_2 = 2; //
+const int engine2_enable = 12; //
+const int pushButton = 3; //
 
 // Called when receiving any WebSocket message
 void onWebSocketEvent(uint8_t num,
@@ -90,14 +91,16 @@ void setup(void){
   Serial.println("");
   EEPROM.begin(512);
   startMillis = millis();
-  
+
   pinMode(gun1, OUTPUT);
   pinMode(gun2, OUTPUT);
   pinMode(gun3, OUTPUT);
   pinMode(engine1_1, OUTPUT);
   pinMode(engine1_2, OUTPUT);
+  pinMode(engine1_enable, OUTPUT);
   pinMode(engine2_1, OUTPUT);
   pinMode(engine2_2, OUTPUT);
+  pinMode(engine2_enable, OUTPUT);
   pinMode(pushButton, INPUT_PULLUP);
   pinMode(A0, INPUT);
   
@@ -106,10 +109,12 @@ void setup(void){
   digitalWrite(gun3, LOW);
   digitalWrite(engine1_1, LOW);
   digitalWrite(engine1_2, LOW);
+  analogWrite(engine1_enable, 0);
   digitalWrite(engine2_1, LOW);
   digitalWrite(engine2_2, LOW);
+  analogWrite(engine2_enable, 0);
 
-  (getPassFromEEPROM()).toCharArray(AP_PASS, 20); //get access point password from EEPROM
+  (getPassFromEEPROM()).toCharArray(AP_PASS, 30); //get access point password from EEPROM
   WiFi.mode(WIFI_AP);
   WiFi.softAP(AP_SSID, AP_PASS, 5, false, 1); //Start Hotspot removing password will disable security
   // Start WebSocket server and assign callback
@@ -137,45 +142,53 @@ void processJson(){
   reqType = jsonDocRecv["androidReq"];
   if(((String)secretToken).equals("MatarataSecretToken1994")){
     if(((String)reqType).equals("motor_left")){
-      reqStrengthRev = jsonDocRecv["strengthRev"];
-      motorStrengthRev = ((String)reqStrengthRev).toInt();
-      digitalWrite(engine1_1, HIGH);
-      analogWrite(engine1_2, motorStrengthRev);
-      analogWrite(engine2_1, motorStrengthRev);
-      digitalWrite(engine2_2, HIGH);
+      reqStrength = jsonDocRecv["strength"];
+      motorStrength = ((String)reqStrength).toInt();
+      Serial.println("left");
+      digitalWrite(engine1_1, LOW);
+      digitalWrite(engine1_2, HIGH);
+      digitalWrite(engine2_1, HIGH);
+      digitalWrite(engine2_2, LOW);
+      analogWrite(engine1_enable, motorStrength);
+      analogWrite(engine2_enable, motorStrength);
     }else if(((String)reqType).equals("motor_right")){
       reqStrength = jsonDocRecv["strength"];
       motorStrength = ((String)reqStrength).toInt();
-      digitalWrite(engine1_1, LOW);
-      analogWrite(engine1_2, motorStrength);
-      analogWrite(engine2_1, motorStrength);
-      digitalWrite(engine2_2, LOW);
+      digitalWrite(engine1_1, HIGH);
+      digitalWrite(engine1_2, LOW);
+      digitalWrite(engine2_1, LOW);
+      digitalWrite(engine2_2, HIGH);
+      analogWrite(engine1_enable, motorStrength);
+      analogWrite(engine2_enable, motorStrength);
     }else if(((String)reqType).equals("motor_forward")){
       reqStrength = jsonDocRecv["strength"];
-      reqStrengthRev = jsonDocRecv["strengthRev"];
       motorStrength = ((String)reqStrength).toInt();
-      motorStrengthRev = ((String)reqStrengthRev).toInt();
       digitalWrite(engine1_1, HIGH);
-      analogWrite(engine1_2, motorStrengthRev);
-      analogWrite(engine2_1, motorStrength);
+      digitalWrite(engine1_2, LOW);
+      digitalWrite(engine2_1, HIGH);
       digitalWrite(engine2_2, LOW);
+      analogWrite(engine1_enable, motorStrength);
+      analogWrite(engine2_enable, motorStrength);
     }else if(((String)reqType).equals("motor_backward")){
       reqStrength = jsonDocRecv["strength"];
-      reqStrengthRev = jsonDocRecv["strengthRev"];
       motorStrength = ((String)reqStrength).toInt();
-      motorStrengthRev = ((String)reqStrengthRev).toInt();
+      Serial.println("left");
       digitalWrite(engine1_1, LOW);
-      analogWrite(engine1_2, motorStrength);
-      analogWrite(engine2_1, motorStrengthRev);
+      digitalWrite(engine1_2, HIGH);
+      digitalWrite(engine2_1, LOW);
       digitalWrite(engine2_2, HIGH);
+      analogWrite(engine1_enable, motorStrength);
+      analogWrite(engine2_enable, motorStrength);
     }else if(((String)reqType).equals("motor_off")){
       myVoltFloat = ((analogRead(A0) * 3.3) / 1023.0) / 0.12;
       myVoltFloat = roundf(myVoltFloat*100.0)/100.0;
       sendDataToAndroid("done", myVoltFloat);
       digitalWrite(engine1_1, LOW);
-      analogWrite(engine1_2, 0);
-      analogWrite(engine2_1, 0);
+      digitalWrite(engine1_2, LOW);
+      digitalWrite(engine2_1, LOW);
       digitalWrite(engine2_2, LOW);
+      analogWrite(engine1_enable, 0);
+      analogWrite(engine2_enable, 0);
     }else if(((String)reqType).equals("gun1")){
       digitalWrite(gun1, HIGH);
       delay(10);
@@ -244,7 +257,6 @@ void changePassEEPROM(){
 String getPassFromEEPROM(){
   eepromGetValueCount = EEPROM.read(eepromAddressCount);
   String data = "";
-  int tempAddress = eepromAddress;
   for(int i=eepromAddress; i < (eepromAddress + eepromGetValueCount); i++){
     data = data + ((char) EEPROM.read(i));
   }

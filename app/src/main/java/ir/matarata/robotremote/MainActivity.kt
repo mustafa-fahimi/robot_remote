@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.MotionEvent
 import android.view.Window
 import android.view.WindowManager
@@ -30,7 +31,6 @@ class MainActivity : AppCompatActivity() {
     private var gun3State = false
     private var joystickState = ""
     private var mappedStrength = 0
-    private var mappedStrengthReverse = 0
     private var onPaused = false
     private lateinit var handler: CoroutineExceptionHandler
     private lateinit var mSocket: WebSocket
@@ -54,12 +54,11 @@ class MainActivity : AppCompatActivity() {
         ma_btn_gun1.setOnTouchListener { _, event ->
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
+                    ma_btn_gun1.backgroundColor = ContextCompat.getColor(this, R.color.colorAccent)
                     myJsonObject = JSONObject()
                     myJsonObject.put("token", "MatarataSecretToken1994")
                     myJsonObject.put("androidReq", "gun1")
                     socketSendReceive(myJsonObject)
-
-                    ma_btn_gun1.backgroundColor = ContextCompat.getColor(this, R.color.colorAccent)
                 }
                 MotionEvent.ACTION_UP -> {
                     ma_btn_gun1.backgroundColor = ContextCompat.getColor(this, R.color.red_color)
@@ -131,18 +130,19 @@ class MainActivity : AppCompatActivity() {
                 joystickState = "motor_backward"
             } else if (strength < 12) {
                 joystickState = "motor_off"
+                Log.d(TAG,"offing")
             }
             //Converted strength to range [0..1023]
-            mappedStrength = mapRange(IntRange(13, 100), IntRange(900, 1030), strength)
-            //Converted strength to range [1023..0]
-            mappedStrengthReverse = mapRange(IntRange(13, 100), IntRange(230, 0), strength)
+            mappedStrength = mapRange(IntRange(0, 100), IntRange(400, 1030), strength)
+            if(mappedStrength > 1023)
+                mappedStrength = 1023
             myJsonObject = JSONObject()
             myJsonObject.put("token", "MatarataSecretToken1994")
             myJsonObject.put("androidReq", joystickState)
             myJsonObject.put("strength", "$mappedStrength")
-            myJsonObject.put("strengthRev", "$mappedStrengthReverse")
+            Log.d(TAG, mappedStrength.toString())
             socketSendReceive(myJsonObject)
-        }, 100)
+        }, 400)
 
     }
 
