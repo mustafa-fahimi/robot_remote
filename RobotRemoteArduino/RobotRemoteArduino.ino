@@ -3,19 +3,6 @@
 #include <ArduinoJson.h>
 #include <EEPROM.h>
 
-//#define gun1 5
-//#define gun2 4
-//#define gun3 15
-//#define engine1_1 11
-//#define engine1_2 7
-//#define engine1_enable 14
-//#define engine2_1 6
-//#define engine2_2 8
-//#define engine2_enable 12
-//#define pushButton 3
-
-WebSocketsServer webSocket = WebSocketsServer(80);
-
 //variables decleration
 const char* AP_SSID = "ESP_Remote";
 const char* secretToken = "";
@@ -46,6 +33,7 @@ uint8_t globalSocketNum;
 DynamicJsonDocument jsonDocRecv(250);
 DynamicJsonDocument jsonDocSend(250);
 DeserializationError error;
+WebSocketsServer webSocket = WebSocketsServer(80);
 
 //Pins decleration
 const int gun1 = 5; //
@@ -87,7 +75,7 @@ void onWebSocketEvent(uint8_t num,
 }
 
 void setup(void){
-  Serial.begin(115200);
+  Serial.begin(9600);
   Serial.println("");
   EEPROM.begin(512);
   startMillis = millis();
@@ -131,7 +119,6 @@ void loop(void){
 }
 
 void processJson(){
-  autoSocketDisconnect();
   jsonDocRecv.clear();
   error = deserializeJson(jsonDocRecv, (String)socketResult);
   if(error){
@@ -287,25 +274,4 @@ void readResetBtn(){
   }else if(buttonState == HIGH){
     timeCounter = 0;
   }
-}
-
-void autoSocketDisconnect(){
-  currentMillisSocket = millis();
-    if(currentMillis - startMillis >= period){
-      startMillis = currentMillis;
-      timeCounter++;
-    }
-    if(timeCounter == 6){
-      timeCounter = 0;
-      char defaultPass[12] = "asakrobatic";
-      EEPROM.write(eepromAddressCount, 11);
-      int x = 0;
-      for(int i=eepromAddress; i < (eepromAddress + 11); i++){
-        EEPROM.write(i, defaultPass[x]);
-        x++;
-      }
-      EEPROM.commit();
-      delay(1000);
-      resetFunc(); //call reset
-    }
 }
