@@ -52,8 +52,7 @@ const int pushButton = 3;
 
 //Methods declaration
 void onWebSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length);
-void onStationDisconnected(const WiFiEventSoftAPModeStationDisconnected& evt);
-String macToString(const unsigned char* mac);
+void onStationDisconnected(const WiFiEventSoftAPModeStationDisconnected &evt);
 void processJson();
 void sendStateToAndroid(String state);
 void sendDataToAndroid(String state, float voltage);
@@ -73,11 +72,21 @@ void onWebSocketEvent(uint8_t num,
   {
   case WStype_TEXT:
     timeCounterSocket = 0;
+    autoSocketDisconnect();
     globalSocketNum = num;
     sprintf(socketResult, "%s", payload);
     processJson();
     break;
   case WStype_DISCONNECTED:
+    digitalWrite(gun1, LOW);
+    digitalWrite(gun2, LOW);
+    digitalWrite(gun3, LOW);
+    digitalWrite(engine1_1, LOW);
+    digitalWrite(engine1_2, LOW);
+    analogWrite(engine1_enable, 0);
+    digitalWrite(engine2_1, LOW);
+    digitalWrite(engine2_2, LOW);
+    analogWrite(engine2_enable, 0);
   case WStype_CONNECTED:
   case WStype_BIN:
   case WStype_ERROR:
@@ -90,39 +99,36 @@ void onWebSocketEvent(uint8_t num,
   }
 }
 
-void (*resetFunc)(void) = 0; //declare reset function @ address 0
-
 void setup(void)
 {
   Serial.begin(115200);
-  Serial.println("");
   EEPROM.begin(512);
   startMillis = millis();
   startMillisSocket = millis();
 
-  // pinMode(gun1, OUTPUT);
-  // pinMode(gun2, OUTPUT);
-  // pinMode(gun3, OUTPUT);
-  // pinMode(engine1_1, OUTPUT);
-  // pinMode(engine1_2, OUTPUT);
-  // pinMode(engine1_enable, OUTPUT);
-  // pinMode(engine2_1, OUTPUT);
-  // pinMode(engine2_2, OUTPUT);
-  // pinMode(engine2_enable, OUTPUT);
-  // pinMode(pushButton, INPUT_PULLUP);
-  // pinMode(A0, INPUT);
+  pinMode(gun1, OUTPUT);
+  pinMode(gun2, OUTPUT);
+  pinMode(gun3, OUTPUT);
+  pinMode(engine1_1, OUTPUT);
+  pinMode(engine1_2, OUTPUT);
+  pinMode(engine1_enable, OUTPUT);
+  pinMode(engine2_1, OUTPUT);
+  pinMode(engine2_2, OUTPUT);
+  pinMode(engine2_enable, OUTPUT);
+  pinMode(pushButton, INPUT_PULLUP);
+  pinMode(A0, INPUT);
 
-  // digitalWrite(gun1, LOW);
-  // digitalWrite(gun2, LOW);
-  // digitalWrite(gun3, LOW);
-  // digitalWrite(engine1_1, LOW);
-  // digitalWrite(engine1_2, LOW);
-  // analogWrite(engine1_enable, 0);
-  // digitalWrite(engine2_1, LOW);
-  // digitalWrite(engine2_2, LOW);
-  // analogWrite(engine2_enable, 0);
+  digitalWrite(gun1, LOW);
+  digitalWrite(gun2, LOW);
+  digitalWrite(gun3, LOW);
+  digitalWrite(engine1_1, LOW);
+  digitalWrite(engine1_2, LOW);
+  analogWrite(engine1_enable, 0);
+  digitalWrite(engine2_1, LOW);
+  digitalWrite(engine2_2, LOW);
+  analogWrite(engine2_enable, 0);
 
-  //(getPassFromEEPROM()).toCharArray(AP_PASS, 30); //get access point password from EEPROM
+  (getPassFromEEPROM()).toCharArray(AP_PASS, 30); //get access point password from EEPROM
   WiFi.persistent(false);
   WiFi.mode(WIFI_AP);
   WiFi.softAP(AP_SSID, AP_PASS, 5, false, 1); //Start Hotspot removing password will disable security
@@ -138,18 +144,6 @@ void loop(void)
   webSocket.loop();
   readResetBtn();
   delay(10);
-}
-
-void onStationDisconnected(const WiFiEventSoftAPModeStationDisconnected& evt) {
-  ///TODO: Set all pins to LOW
-  webSocket.disconnect(globalSocketNum);
-}
-
-String macToString(const unsigned char* mac) {
-  char buf[20];
-  snprintf(buf, sizeof(buf), "%02x:%02x:%02x:%02x:%02x:%02x",
-           mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
-  return String(buf);
 }
 
 void processJson()
@@ -170,7 +164,6 @@ void processJson()
     {
       reqStrength = jsonDocRecv["strength"];
       motorStrength = ((String)reqStrength).toInt();
-      Serial.println("left");
       digitalWrite(engine1_1, LOW);
       digitalWrite(engine1_2, HIGH);
       digitalWrite(engine2_1, HIGH);
@@ -204,7 +197,6 @@ void processJson()
     {
       reqStrength = jsonDocRecv["strength"];
       motorStrength = ((String)reqStrength).toInt();
-      Serial.println("left");
       digitalWrite(engine1_1, LOW);
       digitalWrite(engine1_2, HIGH);
       digitalWrite(engine2_1, LOW);
@@ -293,6 +285,20 @@ void sendDataToAndroid(String state, float voltage)
   webSocket.sendTXT(globalSocketNum, dataToSend);
 }
 
+void onStationDisconnected(const WiFiEventSoftAPModeStationDisconnected &evt)
+{
+  digitalWrite(gun1, LOW);
+  digitalWrite(gun2, LOW);
+  digitalWrite(gun3, LOW);
+  digitalWrite(engine1_1, LOW);
+  digitalWrite(engine1_2, LOW);
+  analogWrite(engine1_enable, 0);
+  digitalWrite(engine2_1, LOW);
+  digitalWrite(engine2_2, LOW);
+  analogWrite(engine2_enable, 0);
+  webSocket.disconnect(globalSocketNum);
+}
+
 void changePassEEPROM()
 {
   reqNewPassLength = strlen(reqNewPass);
@@ -305,7 +311,7 @@ void changePassEEPROM()
   }
   EEPROM.commit();
   delay(1500);
-  resetFunc(); //call reset  54
+  ESP.restart();
 }
 
 String getPassFromEEPROM()
@@ -322,7 +328,7 @@ String getPassFromEEPROM()
 void readResetBtn()
 {
   buttonState = digitalRead(pushButton);
-  if (buttonState == HIGH)
+  if (buttonState == LOW)
   {
     currentMillis = millis();
     if (currentMillis - startMillis >= period)
@@ -343,10 +349,10 @@ void readResetBtn()
       }
       EEPROM.commit();
       delay(1000);
-      resetFunc(); //call reset
+      ESP.restart();
     }
   }
-  else if (buttonState == LOW)
+  else if (buttonState == HIGH)
   {
     timeCounter = 0;
   }
