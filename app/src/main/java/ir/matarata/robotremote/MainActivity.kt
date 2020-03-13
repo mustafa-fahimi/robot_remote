@@ -1,52 +1,42 @@
 package ir.matarata.robotremote
 
-import android.app.Activity
+import android.app.Dialog
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.MotionEvent
-import android.view.Window
-import android.view.WindowManager
-import androidx.annotation.ColorRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.neovisionaries.ws.client.WebSocket
-import com.neovisionaries.ws.client.WebSocketAdapter
-import com.neovisionaries.ws.client.WebSocketFactory
-import com.neovisionaries.ws.client.WebSocketFrame
+import com.neovisionaries.ws.client.*
+import com.yarolegovich.lovelydialog.LovelyInfoDialog
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.json.JSONObject
 
 
 class MainActivity : AppCompatActivity() {
 
-    companion object {
-        const val TAG = "MATATAG"
-    }
-
-    private var gun3State = false
-    private var joystickState = ""
-    private var mappedStrength = 0
-    private var onPaused = false
-    private lateinit var handler: CoroutineExceptionHandler
-    private lateinit var mSocket: WebSocket
-    private lateinit var myJsonObject: JSONObject
-    private lateinit var responseJsonObject: JSONObject
-    private val socketURL = "ws://192.168.4.1:80"
-    private lateinit var websSocketFactory: WebSocketFactory
-    private var tempVoltage: Double = 0.0
+    private var gun3State = false //state variable for changing the color of gun3
+    private var joystickState = "" //state of joystick for sending to Esp
+    private var mappedStrength = 0 //strength of joystick after mapped from a range to another one
+    private var onPaused = false //variable to determine if activity paused or stop
+    private lateinit var handler: CoroutineExceptionHandler //handle exceptions of coroutines
+    private lateinit var mSocket: WebSocket //the main socket
+    private lateinit var myJsonObject: JSONObject //json object to send to Esp
+    private lateinit var responseJsonObject: JSONObject //json object to receive data from Esp
+    private val socketURL = "ws://192.168.4.1:80" //WebSocket url
+    private lateinit var websSocketFactory: WebSocketFactory //WebSocket factory
+    private var tempVoltage: Double = 0.0 //variable to store Esp voltage
+    private var mDialog: Dialog? = null //variable to store alert dialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        setSystemBarColor(this, R.color.darker_blue)
-        socketCreate()
+        Utils.setSystemBarColor(this, R.color.darker_blue) //change the color of system bar
+        socketCreate() //create socket for first time app start
         handler = CoroutineExceptionHandler { _, _ ->
+            //change the text and textColor of connection state
             ma_tv_connectionState.text = getString(R.string.connection_state_problem)
             ma_tv_connectionState.setTextColor(ContextCompat.getColor(this, R.color.red_color))
         }
@@ -54,13 +44,16 @@ class MainActivity : AppCompatActivity() {
         ma_btn_gun1.setOnTouchListener { _, event ->
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
+                    //change the background color of gun1 to green
                     ma_btn_gun1.backgroundColor = ContextCompat.getColor(this, R.color.colorAccent)
+                    //prepare json to send for Esp
                     myJsonObject = JSONObject()
-                    myJsonObject.put("token", "MatarataSecretToken1994")
+                    myJsonObject.put("token", "MataSecToken")
                     myJsonObject.put("androidReq", "gun1")
-                    socketSendReceive(myJsonObject)
+                    socketSendData(myJsonObject)
                 }
                 MotionEvent.ACTION_UP -> {
+                    //change the background color of gun1 to red
                     ma_btn_gun1.backgroundColor = ContextCompat.getColor(this, R.color.red_color)
                 }
             }
@@ -69,57 +62,74 @@ class MainActivity : AppCompatActivity() {
         ma_btn_gun2.setOnTouchListener { _, event ->
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
+                    //change the background color of gun2 to green
                     ma_btn_gun2.backgroundColor = ContextCompat.getColor(this, R.color.colorAccent)
+                    //prepare json to send for Esp
                     myJsonObject = JSONObject()
-                    myJsonObject.put("token", "MatarataSecretToken1994")
+                    myJsonObject.put("token", "MataSecToken")
                     myJsonObject.put("androidReq", "gun2")
                     myJsonObject.put("state", "on")
-                    socketSendReceive(myJsonObject)
+                    socketSendData(myJsonObject)
                 }
                 MotionEvent.ACTION_UP -> {
+                    //change the background color of gun2 to red
                     ma_btn_gun2.backgroundColor = ContextCompat.getColor(this, R.color.red_color)
+                    //prepare json to send for Esp
                     myJsonObject = JSONObject()
-                    myJsonObject.put("token", "MatarataSecretToken1994")
+                    myJsonObject.put("token", "MataSecToken")
                     myJsonObject.put("androidReq", "gun2")
                     myJsonObject.put("state", "off")
-                    socketSendReceive(myJsonObject)
+                    socketSendData(myJsonObject)
                 }
             }
             true
         }
         ma_btn_gun3.setOnClickListener {
             if (!gun3State) {
-                ma_btn_gun3.backgroundColor = ContextCompat.getColor(this, R.color.colorAccent)
+                //prepare json to send for Esp
                 myJsonObject = JSONObject()
-                myJsonObject.put("token", "MatarataSecretToken1994")
+                myJsonObject.put("token", "MataSecToken")
                 myJsonObject.put("androidReq", "gun3")
                 myJsonObject.put("state", "on")
-                socketSendReceive(myJsonObject)
+                socketSendData(myJsonObject)
             } else if (gun3State) {
-                ma_btn_gun3.backgroundColor = ContextCompat.getColor(this, R.color.red_color)
+                //prepare json to send for Esp
                 myJsonObject = JSONObject()
-                myJsonObject.put("token", "MatarataSecretToken1994")
+                myJsonObject.put("token", "MataSecToken")
                 myJsonObject.put("androidReq", "gun3")
                 myJsonObject.put("state", "off")
-                socketSendReceive(myJsonObject)
+                socketSendData(myJsonObject)
             }
         }
         ma_btn_settings.setOnClickListener {
+            //send socket close request to Esp and then disconnect
+            mSocket.sendClose()
             mSocket.disconnect()
             intent = Intent(this, SettingActivity::class.java)
             startActivity(intent)
             finish()
         }
+        ma_jsv_joystick.setOnFocusChangeListener { _, hasFocus ->
+            //send request to Esp that turn off motors when joystick lost focus
+            if (!hasFocus) {
+                Log.d(Utils.TAG, "Joystick lost focus")
+                myJsonObject = JSONObject()
+                myJsonObject.put("token", "MataSecToken")
+                myJsonObject.put("androidReq", "motor_off")
+                socketSendData(myJsonObject)
+            }
+        }
         ma_jsv_joystick.setOnMoveListener({ angle, strength ->
             if (onPaused) {
+                //If user playing with joysticks and suddenly hit Home or Recent button in his device then in onPause method we set the onPaused variable to true and
+                // here we send motor_off request to Esp
                 myJsonObject = JSONObject()
-                myJsonObject.put("token", "MatarataSecretToken1994")
+                myJsonObject.put("token", "MataSecToken")
                 myJsonObject.put("androidReq", "motor_off")
-                myJsonObject.put("strength", "0")
-                myJsonObject.put("strengthRev", "1023")
-                socketSendReceive(myJsonObject)
+                socketSendData(myJsonObject)
                 return@setOnMoveListener
             }
+            //fill out joystickState variable base on joystick angle to send to Esp
             if (strength > 15 && (angle in 315..360 || angle in 0..45)) {
                 joystickState = "motor_right"
             } else if (strength > 12 && angle in 45..135) {
@@ -130,29 +140,40 @@ class MainActivity : AppCompatActivity() {
                 joystickState = "motor_backward"
             } else if (strength < 12) {
                 joystickState = "motor_off"
-                Log.d(TAG,"offing")
             }
-            //Converted strength to range [0..1023]
-            mappedStrength = mapRange(IntRange(0, 100), IntRange(400, 1030), strength)
-            if(mappedStrength > 1023)
+            //Map the strength of joystick from [0..100] to [X..1030] for PWM of Esp
+            mappedStrength = Utils.mapRange(IntRange(0, 100), IntRange(400, 1030), strength)
+            if (mappedStrength >= 1023)
                 mappedStrength = 1023
+            //prepare json to send for Esp
             myJsonObject = JSONObject()
-            myJsonObject.put("token", "MatarataSecretToken1994")
+            myJsonObject.put("token", "MataSecToken")
             myJsonObject.put("androidReq", joystickState)
             myJsonObject.put("strength", "$mappedStrength")
-            Log.d(TAG, mappedStrength.toString())
-            socketSendReceive(myJsonObject)
-        }, 400)
+            socketSendData(myJsonObject)
+        }, 50) //Loop interval of joystick
 
     }
 
+    //Method for create a new socket and append the listener to it
     private fun socketCreate() {
-        websSocketFactory = WebSocketFactory().setConnectionTimeout(3000)
-        mSocket = websSocketFactory.createSocket(socketURL)
+        websSocketFactory = WebSocketFactory().setConnectionTimeout(2000) //socket timeout
+        mSocket = websSocketFactory.createSocket(socketURL) //create socket
+        //socket listener
         mSocket.addListener(object : WebSocketAdapter() {
             override fun onTextMessage(websocket: WebSocket?, text: String?) {
                 if (text.toString() != "null")
                     processReceivedResult(text.toString())
+            }
+
+            override fun onError(websocket: WebSocket?, cause: WebSocketException?) {
+                mSocket.sendClose()
+                mSocket.disconnect()
+            }
+
+            override fun onUnexpectedError(websocket: WebSocket?, cause: WebSocketException?) {
+                mSocket.sendClose()
+                mSocket.disconnect()
             }
 
             override fun onDisconnected(websocket: WebSocket?, serverCloseFrame: WebSocketFrame?, clientCloseFrame: WebSocketFrame?, closedByServer: Boolean) {
@@ -162,79 +183,117 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    private fun socketSendReceive(jsonObj: JSONObject? = null) {
+    //call the create socket if needed and then send data to Esp using socket connection
+    private fun socketSendData(jsonObj: JSONObject) {
         if (mSocket.state.toString() == "CLOSED") {
-            socketCreate()
+            socketCreate() //create a new socket if socket state is CLOSED
         }
-        CoroutineScope(handler).launch {
+        if (mSocket.state.toString() == "CONNECTING")
+            return //return and do nothing if socket state is CONNECTING
+        //launch a coroutine for multi threading and add a handler to it for exceptions
+        CoroutineScope(Dispatchers.IO + handler).launch {
             if (mSocket.state.toString() == "CLOSED" || mSocket.state.toString() == "CREATED") {
-                mSocket.connect()
-            }
-            while (true) {
-                if (mSocket.state.toString() == "CLOSED")
-                    break
-                if (mSocket.isOpen) {
-                    mSocket.sendText(jsonObj.toString())
-                    break
+                try {
+                    mSocket.connect() //if socket is created before then try to connect to it
+                } catch (e: java.lang.Exception) {
+                    this.cancel() //cancel the coroutine
+                    showInfoDialog(
+                        R.color.red_color,
+                        R.drawable.ic_wifi_white_50dp,
+                        getString(R.string.dialog_btn),
+                        getString(R.string.wifi_dialog_title),
+                        getString(R.string.wifi_dialog_message)
+                    ) //show the wifi problem dialog to user
                 }
+            }
+            if (mSocket.isOpen) {
+                mSocket.sendText(jsonObj.toString()) //send json object as a string to socket
             }
         }
     }
 
+    //handle the response from Esp
     private fun processReceivedResult(res: String) {
-        try {
-            responseJsonObject = JSONObject(res)
-            if (responseJsonObject.getString("espResult") == "done") {
-                ma_tv_connectionState.text = getString(R.string.connection_state_connected)
-                ma_tv_connectionState.setTextColor(ContextCompat.getColor(this, R.color.colorAccent))
-                when (myJsonObject.getString("androidReq")) {
-                    "gun2" -> {
-                        tempVoltage = responseJsonObject.getDouble("voltage")
-                        ma_tv_batteryVoltage.text = "ولتاژ باتری موتور: $tempVoltage ولت"
-                    }
-                    "gun3" -> {
-                        if (myJsonObject.getString("state") == "on") {
-                            gun3State = true //its on
+        //launch a coroutine in Main thread and append a handler to it
+        CoroutineScope(Dispatchers.Main + handler).launch {
+            try {
+                responseJsonObject = JSONObject(res) //create a json object from string response of Esp
+                if (responseJsonObject.getString("espResult") == "done") {
+                    //response from Esp is "done"
+                    ma_tv_connectionState.text = getString(R.string.connection_state_connected) //change connection state textView
+                    ma_tv_connectionState.setTextColor(ContextCompat.getColor(this@MainActivity, R.color.colorAccent)) //change connection state textView color
+                    when (myJsonObject.getString("androidReq")) {
+                        "gun2" -> {
+                            //runs when current request was gun2
+                            //store the voltage that comes from Esp and show it
                             tempVoltage = responseJsonObject.getDouble("voltage")
                             ma_tv_batteryVoltage.text = "ولتاژ باتری موتور: $tempVoltage ولت"
-                        } else if (myJsonObject.getString("state") == "off") {
-                            gun3State = false //its off
+                        }
+                        "gun3" -> {
+                            //runs when current request was gun3
+                            if (myJsonObject.getString("state") == "on") {
+                                //current request of gun3 is "on" and run this
+                                gun3State = true //set gun3 state variable to on
+                                //store the voltage that comes from Esp and show it and change the background color of gun3 to green
+                                tempVoltage = responseJsonObject.getDouble("voltage")
+                                ma_tv_batteryVoltage.text = "ولتاژ باتری موتور: $tempVoltage ولت"
+                                ma_btn_gun3.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.colorAccent)
+                            } else if (myJsonObject.getString("state") == "off") {
+                                gun3State = false //set gun3 state variable to on
+                                ma_btn_gun3.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.red_color) //change the background color of gun3 to red
+                            }
                         }
                     }
+                } else if (responseJsonObject.getString("espResult") == "fail") {
+                    //response from Esp is "fail"
+                    ma_tv_connectionState.text = getString(R.string.connection_state_problem) //change connection state textView
+                    ma_tv_connectionState.setTextColor(ContextCompat.getColor(this@MainActivity, R.color.red_color)) //change connection state textView color to red
+                    if (myJsonObject.getString("androidReq") == "gun3") {
+                        gun3State = false
+                        ma_btn_gun3.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.red_color)
+                    }
                 }
-            } else if (responseJsonObject.getString("espResult") == "fail") {
-                ma_tv_connectionState.text = getString(R.string.connection_state_problem)
-                ma_tv_connectionState.setTextColor(ContextCompat.getColor(this, R.color.red_color))
+            } catch (e: Exception) {
+                //didn't get a response from Esp
+                ma_tv_connectionState.text = getString(R.string.connection_state_problem) //change connection state textView
+                ma_tv_connectionState.setTextColor(ContextCompat.getColor(this@MainActivity, R.color.red_color)) //change connection state textView color to red
                 if (myJsonObject.getString("androidReq") == "gun3") {
-                    gun3State = false
-                    ma_btn_gun3.backgroundColor = ContextCompat.getColor(this, R.color.red_color)
+                    gun3State = false //set gun3 state variable to on
+                    ma_btn_gun3.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.red_color) //change the background color of gun3 to red
                 }
             }
-        } catch (e: java.lang.Exception) {
-            ma_tv_connectionState.text = getString(R.string.connection_state_problem)
-            ma_tv_connectionState.setTextColor(ContextCompat.getColor(this, R.color.red_color))
-            if (myJsonObject.getString("androidReq") == "gun3") {
-                gun3State = false
-                ma_btn_gun3.backgroundColor = ContextCompat.getColor(this, R.color.red_color)
+        }
+    }
+
+    //create and show the alert dialog for wifi problem
+    private fun showInfoDialog(topColor: Int, icon: Int, btnText: String, title: String, message: String) {
+        //create a coroutine in Main thread and append handler to it
+        CoroutineScope(Dispatchers.Main + handler).launch {
+            ma_tv_connectionState.text = getString(R.string.connection_state_problem) //change connection state textView
+            ma_tv_connectionState.setTextColor(ContextCompat.getColor(this@MainActivity, R.color.red_color)) //change connection state textView color to red
+            gun3State = false //set gun3 state variable to on
+            ma_btn_gun3.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.red_color) //change the background color of gun3 to red
+            if (mDialog == null) {
+                //its the first time to showing dialog so we create it here and show
+                mDialog = LovelyInfoDialog(this@MainActivity)
+                    .setTopColorRes(topColor)
+                    .setIcon(icon)
+                    .setConfirmButtonText(btnText)
+                    .setTitle(title)
+                    .setMessage(message)
+                    .show()
+            } else {
+                if (!mDialog!!.isShowing) {
+                    //there isn't another dialog showing so we show dialog
+                    mDialog = LovelyInfoDialog(this@MainActivity)
+                        .setTopColorRes(topColor)
+                        .setIcon(icon)
+                        .setConfirmButtonText(btnText)
+                        .setTitle(title)
+                        .setMessage(message)
+                        .show()
+                }
             }
-        }
-    }
-
-    private fun mapRange(range1: IntRange, range2: IntRange, value: Int): Int {
-        return try {
-            range2.start + (value - range1.start) * (range2.endInclusive - range2.start) / (range1.endInclusive - range1.start)
-        } catch (e: Exception) {
-            0
-        }
-    }
-
-    //Change the color of system bar in Apis above lollipop
-    private fun setSystemBarColor(act: Activity, @ColorRes color: Int) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            val window: Window = act.window
-            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
-            window.statusBarColor = ContextCompat.getColor(this, color)
         }
     }
 
@@ -264,4 +323,4 @@ class MainActivity : AppCompatActivity() {
 
 }
 
-class IntRange(override val start: Int, override val endInclusive: Int) : ClosedRange<Int>
+

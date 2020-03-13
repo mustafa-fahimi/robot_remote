@@ -14,4 +14,12 @@
     <string name="new_wifi_pass_again">تکرار رمز وای فای جدید</string>
     <string name="submit_on_board">ثبت در مدار</string>
     <string name="battery_voltage">ولتاژ باتری موتور: نامعلوم</string>
+    <string name="wifi_dialog_title">اتصال وای فای</string>
+    <string name="wifi_dialog_message">از متصل بودن وای فای به ماژول اطمینان حاصل نمایید.</string>
+    <string name="dialog_btn">تایید</string>
+    <string name="success_dialog_title">ثبت با موفقیت</string>
+    <string name="success_dialog_message">اطلاعات جدید با موفقیت در ریموت ثبت گردید.</string>
+    <string name="fail_dialog_title">خطا در ثبت</string>
+    <string name="fail_dialog_message">خطایی رخ داده است. لطفا مجددا تلاش نمایید.</string>
+    <string name="progress_dialog_title">لطفا منتظر بمانید…</string>
 </resources>
