@@ -67,14 +67,15 @@ void onWebSocketEvent(uint8_t num,
   // Figure out the type of WebSocket event
   switch (type)
   {
-  case WStype_TEXT:
-    timeCounterSocket = 0;
+  case WStype_TEXT:        //for handling incoming texts from android
+    timeCounterSocket = 0; //set auto socket disconnect variable to 0 cause we got some data
     autoSocketDisconnect();
-    globalSocketNum = num;
-    sprintf(socketResult, "%s", payload);
-    processJson();
+    globalSocketNum = num;                //store socket client number to a global variable
+    sprintf(socketResult, "%s", payload); //store payload which is the text that we got from android into socketResult variable for global use
+    processJson();                        //handle the json data we got from android
     break;
-  case WStype_DISCONNECTED:
+  case WStype_DISCONNECTED: //for handling socket client disconnection
+    //set all pins to low cause user disconnected
     digitalWrite(gun1, LOW);
     digitalWrite(gun2, LOW);
     digitalWrite(gun3, LOW);
@@ -125,11 +126,11 @@ void setup(void)
   //digitalWrite(engine2_2, LOW);
   analogWrite(engine2_enable, 0);
 
-  (getPassFromEEPROM()).toCharArray(AP_PASS, 30); //get access point password from EEPROM
-  WiFi.persistent(false);
-  WiFi.mode(WIFI_AP);
-  WiFi.softAP(AP_SSID, AP_PASS, 5, false, 1); //Start Hotspot removing password will disable security
-  stationDisconnectedHandler = WiFi.onSoftAPModeStationDisconnected(&onStationDisconnected);
+  (getPassFromEEPROM()).toCharArray(AP_PASS, 30);                                            //get access point password from EEPROM and store it in AP_PASS
+  WiFi.persistent(false);                                                                    //don't save the wifi state
+  WiFi.mode(WIFI_AP);                                                                        //determine the wifi mode for accesss point
+  WiFi.softAP(AP_SSID, AP_PASS, 5, false, 1);                                                //start Esp access point and limit it to 1 connection
+  stationDisconnectedHandler = WiFi.onSoftAPModeStationDisconnected(&onStationDisconnected); //access point disconnection handler
   // Start WebSocket server and assign callback
   webSocket.begin();
   webSocket.onEvent(onWebSocketEvent);
@@ -137,30 +138,33 @@ void setup(void)
 
 void loop(void)
 {
-  // Look for and handle WebSocket data
-  webSocket.loop();
-  readResetBtn();
+  webSocket.loop(); //loop and handle WebSocket connections
+  readResetBtn();   //constantly read button on Esp and if it holded 3 second then do a factory reset
   delay(10);
 }
 
 void processJson()
 {
   autoSocketDisconnect();
-  jsonDocRecv.clear();
-  error = deserializeJson(jsonDocRecv, (String)socketResult);
+  jsonDocRecv.clear();                                        //clear json recieve document
+  error = deserializeJson(jsonDocRecv, (String)socketResult); //deserialize the socketResult that contain json as string into json document
   if (error)
   {
+    //if deserialization have error then send fail to android
     sendStateToAndroid("fail");
     return;
   }
-  secretToken = jsonDocRecv["token"];
-  reqType = jsonDocRecv["androidReq"];
+  secretToken = jsonDocRecv["token"];  //extract token from json document
+  reqType = jsonDocRecv["androidReq"]; //extract androidReq from json document
   if (((String)secretToken).equals("MataSecToken"))
   {
+    //here secret token we get from android is correct
     if (((String)reqType).equals("motor_left"))
     {
-      reqStrength = jsonDocRecv["strength"];
-      motorStrength = ((String)reqStrength).toInt();
+      //request we get from android is "motor_left"
+      reqStrength = jsonDocRecv["strength"];         //extract strength from json document
+      motorStrength = ((String)reqStrength).toInt(); //convert strength we got from android to int
+      //change pins state for going left
       digitalWrite(engine1_1, LOW);
       digitalWrite(engine1_2, HIGH);
       digitalWrite(engine2_1, HIGH);
@@ -170,8 +174,10 @@ void processJson()
     }
     else if (((String)reqType).equals("motor_right"))
     {
-      reqStrength = jsonDocRecv["strength"];
-      motorStrength = ((String)reqStrength).toInt();
+      //request we get from android is "motor_right"
+      reqStrength = jsonDocRecv["strength"];         //extract strength from json document
+      motorStrength = ((String)reqStrength).toInt(); //convert strength we got from android to int
+      //change pins state for going right
       digitalWrite(engine1_1, HIGH);
       digitalWrite(engine1_2, LOW);
       digitalWrite(engine2_1, LOW);
@@ -181,8 +187,10 @@ void processJson()
     }
     else if (((String)reqType).equals("motor_forward"))
     {
-      reqStrength = jsonDocRecv["strength"];
-      motorStrength = ((String)reqStrength).toInt();
+      //request we get from android is "motor_forward"
+      reqStrength = jsonDocRecv["strength"];         //extract strength from json document
+      motorStrength = ((String)reqStrength).toInt(); //convert strength we got from android to int
+      //change pins state for going forward
       digitalWrite(engine1_1, HIGH);
       digitalWrite(engine1_2, LOW);
       digitalWrite(engine2_1, HIGH);
@@ -192,8 +200,10 @@ void processJson()
     }
     else if (((String)reqType).equals("motor_backward"))
     {
-      reqStrength = jsonDocRecv["strength"];
-      motorStrength = ((String)reqStrength).toInt();
+      //request we get from android is "motor_backward"
+      reqStrength = jsonDocRecv["strength"];         //extract strength from json document
+      motorStrength = ((String)reqStrength).toInt(); //convert strength we got from android to int
+      //change pins state for going backward
       digitalWrite(engine1_1, LOW);
       digitalWrite(engine1_2, HIGH);
       digitalWrite(engine2_1, LOW);
@@ -203,9 +213,11 @@ void processJson()
     }
     else if (((String)reqType).equals("motor_off"))
     {
-      myVoltFloat = ((analogRead(A0) * 3.3) / 1023.0) / 0.12;
-      myVoltFloat = roundf(myVoltFloat * 100.0) / 100.0;
-      sendDataToAndroid("done", myVoltFloat);
+      //request we get from android is "motor_off"
+      myVoltFloat = ((analogRead(A0) * 3.3) / 1023.0) / 0.12; //calculate voltage with proper formula
+      myVoltFloat = roundf(myVoltFloat * 100.0) / 100.0;      //round voltage to float with 2 decimal
+      sendDataToAndroid("done", myVoltFloat);                 //send response to android via voltage
+      //change pins state for turning off motors
       digitalWrite(engine1_1, LOW);
       digitalWrite(engine1_2, LOW);
       digitalWrite(engine2_1, LOW);
@@ -215,74 +227,85 @@ void processJson()
     }
     else if (((String)reqType).equals("gun1"))
     {
+      //request we get from android is "gun1"
+      //change pin state of gun1 for 10 millisecond
       digitalWrite(gun1, HIGH);
       delay(10);
       digitalWrite(gun1, LOW);
     }
     else if (((String)reqType).equals("gun2"))
     {
-      reqState = jsonDocRecv["state"];
-      myVoltFloat = ((analogRead(A0) * 3.3) / 1023.0) / 0.12;
-      myVoltFloat = roundf(myVoltFloat * 100.0) / 100.0;
+      //request we get from android is "gun2"
+      reqState = jsonDocRecv["state"];                        //extract state from json document
+      myVoltFloat = ((analogRead(A0) * 3.3) / 1023.0) / 0.12; //calculate voltage with proper formula
+      myVoltFloat = roundf(myVoltFloat * 100.0) / 100.0;      //round voltage to float with 2 decimal
       if (((String)reqState).equals("on"))
       {
+        //request state from android is turn on
         digitalWrite(gun2, HIGH);
-        sendDataToAndroid("done", myVoltFloat);
+        sendDataToAndroid("done", myVoltFloat); //send response to android via voltage
       }
       else
       {
+        //request state from android is turn off
         digitalWrite(gun2, LOW);
       }
     }
     else if (((String)reqType).equals("gun3"))
     {
-      reqState = jsonDocRecv["state"];
-      myVoltFloat = ((analogRead(A0) * 3.3) / 1023.0) / 0.12;
-      myVoltFloat = roundf(myVoltFloat * 100.0) / 100.0;
+      //request we get from android is "gun3"
+      reqState = jsonDocRecv["state"];                        //extract state from json document
+      myVoltFloat = ((analogRead(A0) * 3.3) / 1023.0) / 0.12; //calculate voltage with proper formula
+      myVoltFloat = roundf(myVoltFloat * 100.0) / 100.0;      //round voltage to float with 2 decimal
       if (((String)reqState).equals("on"))
       {
+        //request state from android is turn on
         digitalWrite(gun3, HIGH);
-        sendDataToAndroid("done", myVoltFloat);
+        sendDataToAndroid("done", myVoltFloat); //send response to android via voltage
       }
       else
       {
+        //request state from android is turn off
         digitalWrite(gun3, LOW);
-        sendStateToAndroid("done");
+        sendStateToAndroid("done"); //send response to android
       }
     }
     else if (String(reqType).equals("changePassword"))
     {
-      reqNewPass = jsonDocRecv["newPassword"];
-      changePassEEPROM();
+      //request we get from android is "change_password"
+      reqNewPass = jsonDocRecv["newPassword"]; //extract newPassword from json document
+      changePassEEPROM();                      //change wifi access point of Esp in EEPROM and reset Esp
     }
   }
   else
   {
+    //token we get from android is wrong so we send fail as response
     sendStateToAndroid("fail");
   }
 }
 
 void sendStateToAndroid(String state)
 {
-  dataToSend = "";
-  jsonDocSend.clear();
-  jsonDocSend["espResult"] = state;
-  serializeJson(jsonDocSend, dataToSend);
-  webSocket.sendTXT(globalSocketNum, dataToSend);
+  dataToSend = "";                                //empty variable that gonna store data we want to send for avoiding any conflict
+  jsonDocSend.clear();                            //clear jseon send document for avoiding any conflict
+  jsonDocSend["espResult"] = state;               //add state we get into espResult as json
+  serializeJson(jsonDocSend, dataToSend);         //serialize json send document
+  webSocket.sendTXT(globalSocketNum, dataToSend); //send json to socket client with correct number
 }
 
 void sendDataToAndroid(String state, float voltage)
 {
-  dataToSend = "";
-  jsonDocSend.clear();
-  jsonDocSend["espResult"] = state;
-  jsonDocSend["voltage"] = voltage;
-  serializeJson(jsonDocSend, dataToSend);
-  webSocket.sendTXT(globalSocketNum, dataToSend);
+  dataToSend = "";                                //empty variable that gonna store data we want to send for avoiding any conflict
+  jsonDocSend.clear();                            //clear jseon send document for avoiding any conflict
+  jsonDocSend["espResult"] = state;               //add state we get into espResult as json
+  jsonDocSend["voltage"] = voltage;               //add voltage we get into voltage as json
+  serializeJson(jsonDocSend, dataToSend);         //serialize json send document
+  webSocket.sendTXT(globalSocketNum, dataToSend); //send json to socket client with correct number
 }
 
 void onStationDisconnected(const WiFiEventSoftAPModeStationDisconnected &evt)
 {
+  //our only wifi access point client is disconnected so we set all pins to LOW and disconnect the socket
   digitalWrite(gun1, LOW);
   digitalWrite(gun2, LOW);
   digitalWrite(gun3, LOW);
@@ -298,67 +321,71 @@ void onStationDisconnected(const WiFiEventSoftAPModeStationDisconnected &evt)
 void changePassEEPROM()
 {
   reqNewPassLength = strlen(reqNewPass);
-  EEPROM.write(eepromAddressCount, reqNewPassLength);
+  EEPROM.write(eepromAddressCount, reqNewPassLength); //write length of new password on EEPROM
   int x = 0;
   for (int i = eepromAddress; i < (eepromAddress + reqNewPassLength); i++)
   {
     EEPROM.write(i, reqNewPass[x]);
     x++;
   }
-  bool a = EEPROM.commit();
+  bool a = EEPROM.commit(); //store result of writing on EEPROM to a boolean
   if (a == 1)
   {
-    sendStateToAndroid("done");
+    //we successfully write password on EEPROM
+    sendStateToAndroid("done"); //send response to android
   }
   else
   {
-    sendStateToAndroid("fail");
+    sendStateToAndroid("fail"); //send response to android
   }
-  delay(800);
-  ESP.restart();
+  delay(1000);
+  ESP.restart(); //restart Esp
 }
 
 String getPassFromEEPROM()
 {
-  eepromGetValueCount = EEPROM.read(eepromAddressCount);
+  eepromGetValueCount = EEPROM.read(eepromAddressCount); //get length of password to from EEPROM
   eepromGetValue = "";
   for (int i = eepromAddress; i < (eepromAddress + eepromGetValueCount); i++)
   {
     eepromGetValue = eepromGetValue + ((char)EEPROM.read(i));
   }
-  return eepromGetValue;
+  return eepromGetValue; //return password we read from EEPROM for access point
 }
 
 void readResetBtn()
 {
-  buttonState = digitalRead(pushButton);
+  buttonState = digitalRead(pushButton); //read state of reset button
   if (buttonState == LOW)
   {
+    //reset button on Esp pushed
     currentMillis = millis();
     if (currentMillis - startMillis >= period)
     {
+      //user pushed reset button for half a second cause period is 500 millisecond
       startMillis = currentMillis;
       timeCounter++;
     }
     if (timeCounter == 6)
     {
+      //user pushed reset button for 3 seconds (500 * 6 = 3000 millisecond)
       timeCounter = 0;
       char defaultPass[12] = "asakrobatic";
       EEPROM.write(eepromAddressCount, 11);
       int x = 0;
       for (int i = eepromAddress; i < (eepromAddress + 11); i++)
       {
-        EEPROM.write(i, defaultPass[x]);
+        EEPROM.write(i, defaultPass[x]); //write default password which is "asakrobatic" on EEPROM
         x++;
       }
       EEPROM.commit();
-      Serial.println("resseting");
       delay(1000);
-      ESP.restart();
+      ESP.restart(); //restart Esp
     }
   }
   else if (buttonState == HIGH)
   {
+    //reset button on Esp not pushed currently or released
     timeCounter = 0;
   }
 }
@@ -368,11 +395,13 @@ void autoSocketDisconnect()
   currentMillisSocket = millis();
   if (currentMillisSocket - startMillisSocket >= period)
   {
+    //we didn't get any data from android for half a second
     startMillisSocket = currentMillisSocket;
     timeCounterSocket++;
   }
   if (timeCounterSocket == 6)
   {
+    //we didn't get any data from android for 3 seconds so we set counter to 0 and disconnect socket
     timeCounterSocket = 0;
     webSocket.disconnect();
   }
