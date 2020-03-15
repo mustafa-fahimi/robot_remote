@@ -5,13 +5,17 @@ import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.neovisionaries.ws.client.*
+import com.yarolegovich.lovelydialog.LovelyCustomDialog
 import com.yarolegovich.lovelydialog.LovelyInfoDialog
 import dmax.dialog.SpotsDialog
 import kotlinx.android.synthetic.main.activity_setting.*
 import kotlinx.coroutines.*
 import org.json.JSONObject
+
 
 class SettingActivity : AppCompatActivity() {
 
@@ -30,7 +34,7 @@ class SettingActivity : AppCompatActivity() {
 
         Utils.setSystemBarColor(this, R.color.darker_blue) //change the color of system bar
         socketCreate() //create socket for first time app start
-        handler = CoroutineExceptionHandler { _, Throwable ->
+        handler = CoroutineExceptionHandler { _, _ ->
             showInfoDialog(
                 R.color.dark_red_color,
                 R.drawable.ic_fail_white_50dp,
@@ -40,7 +44,11 @@ class SettingActivity : AppCompatActivity() {
             ) //show alert dialog for fail
         }
 
-        sa_btn_submit.setOnClickListener {
+        sa_change_wifi_name_tv.setOnClickListener {
+
+        }
+
+        /*sa_btn_submit.setOnClickListener {
             when {
                 //check password editText is not empty and both are equal and bigger than 8 character
                 sa_et_newPassword.text.isNullOrEmpty() -> {
@@ -64,7 +72,7 @@ class SettingActivity : AppCompatActivity() {
             myJsonObject.put("androidReq", "changePassword")
             myJsonObject.put("newPassword", newPassword)
             socketSendData(myJsonObject)
-        }
+        }*/
 
     }
 
@@ -136,8 +144,8 @@ class SettingActivity : AppCompatActivity() {
                     //response from Esp is "done"
                     delay(2500)
                     progressDialog.cancel()
-                    sa_et_newPassword.text?.clear()
-                    sa_et_newPasswordAgain.text?.clear()
+                    //sa_et_newPassword.text?.clear()
+                    //sa_et_newPasswordAgain.text?.clear()
                     showInfoDialog(
                         R.color.colorAccent,
                         R.drawable.ic_done_white_50dp,

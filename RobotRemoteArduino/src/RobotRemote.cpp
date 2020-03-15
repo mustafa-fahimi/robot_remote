@@ -110,8 +110,8 @@ void setup(void)
   pinMode(engine1_1, OUTPUT);
   pinMode(engine1_2, OUTPUT);
   pinMode(engine1_enable, OUTPUT);
-  //pinMode(engine2_1, OUTPUT);
-  //pinMode(engine2_2, OUTPUT);
+  pinMode(engine2_1, OUTPUT);
+  pinMode(engine2_2, OUTPUT);
   pinMode(engine2_enable, OUTPUT);
   pinMode(pushButton, INPUT_PULLUP);
   pinMode(A0, INPUT);
@@ -122,8 +122,8 @@ void setup(void)
   digitalWrite(engine1_1, LOW);
   digitalWrite(engine1_2, LOW);
   analogWrite(engine1_enable, 0);
-  //digitalWrite(engine2_1, LOW);
-  //digitalWrite(engine2_2, LOW);
+  digitalWrite(engine2_1, LOW);
+  digitalWrite(engine2_2, LOW);
   analogWrite(engine2_enable, 0);
 
   (getPassFromEEPROM()).toCharArray(AP_PASS, 30);                                            //get access point password from EEPROM and store it in AP_PASS

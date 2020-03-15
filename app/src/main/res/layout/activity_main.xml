@@ -18,11 +18,10 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintHorizontal_bias="0.85"
-        android:background="@drawable/nice_joystick_bg_arrows"
+        android:background="@drawable/joystick_bg"
         custom:JV_borderWidth="0dp"
-        app:JV_buttonImage="@drawable/nice_joystick_roller"
-        app:JV_autoReCenterButton="true"
-        custom:JV_buttonSizeRatio="25%"
+        app:JV_buttonImage="@drawable/joystick_roller"
+        custom:JV_buttonSizeRatio="20%"
         custom:JV_fixedCenter="true" />
 
     <com.ornach.nobobutton.NoboButton
@@ -112,8 +111,7 @@
         android:layout_width="35dp"
         android:layout_height="35dp"
         android:layout_margin="10dp"
-        android:backgroundTint="@color/colorAccent"
-        android:background="@drawable/ic_settings_black_24dp"
+        android:background="@drawable/ic_settings"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

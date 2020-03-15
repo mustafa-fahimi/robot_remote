@@ -9,4 +9,7 @@
     <color name="green_color">#81C784</color>
     <color name="dark_blue">#263239</color>
     <color name="darker_blue">#1a2328</color>
+    <color name="grey_50">#4f4f4f</color>
+    <color name="grey_30">#B2B2B2</color>
+    <color name="green_500">#3b9b1b</color>
 </resources>
