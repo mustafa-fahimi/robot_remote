@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">RobotRemote</string>
+    <string name="app_name">روبو ریموت</string>
     <string name="left_arrow">left arrow</string>
     <string name="up_arrow">up arrow</string>
     <string name="right_arrow">right arrow</string>
@@ -10,10 +10,10 @@
     <string name="one_shot_gun">تفنگ تک تیر</string>
     <string name="rapid_gun">تفنگ رگبار</string>
     <string name="toggle_gun">تفنگ ثابت</string>
-    <string name="new_wifi_pass">رمز وای فای جدید</string>
-    <string name="new_wifi_pass_again">تکرار رمز وای فای جدید</string>
-    <string name="submit_on_board">ثبت در مدار</string>
-    <string name="battery_voltage">ولتاژ باتری موتور: نامعلوم</string>
+    <string name="new_wifi_name">نام جدید وای فای</string>
+    <string name="new_wifi_pass">رمز جدید وای فای</string>
+    <string name="new_wifi_pass_again">تکرار رمز جدید وای فای</string>
+    <string name="battery_voltage">ولتاژ موتور: نامعلوم</string>
     <string name="wifi_dialog_title">اتصال وای فای</string>
     <string name="wifi_dialog_message">از متصل بودن وای فای به ماژول اطمینان حاصل نمایید.</string>
     <string name="dialog_btn">تایید</string>

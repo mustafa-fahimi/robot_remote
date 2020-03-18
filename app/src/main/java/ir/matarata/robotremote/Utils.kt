@@ -21,15 +21,4 @@ object Utils {
         }
     }
 
-    //map a number in a range to a number of another range
-    fun mapRange(range1: IntRange, range2: IntRange, value: Int): Int {
-        return try {
-            range2.start + (value - range1.start) * (range2.endInclusive - range2.start) / (range1.endInclusive - range1.start)
-        } catch (e: Exception) {
-            0
-        }
-    }
-
 }
-
-class IntRange(override val start: Int, override val endInclusive: Int) : ClosedRange<Int>

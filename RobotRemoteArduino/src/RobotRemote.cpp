@@ -5,24 +5,28 @@
 #include <EEPROM.h>           //libarry for working with EEPROM
 
 //variables declaration
-const char *AP_SSID = "Asakrobo_Remote";           //store name of wifi access point
 const char *secretToken = "";                      //store token we get from android for security
 const char *reqType = "";                          //store request type we get from android
 const char *reqState = "";                         //store request state we get from android
 const char *reqStrength = "";                      //store strength we get from android
-const char *reqNewPass = "";                       //store new password we get from android
-char AP_PASS[30] = "asakrobatic";                  //store password of wifi access point
+const char *reqNewPass = "";                       //store new wifi password we get from android
+const char *reqNewName = "";                       //store new wifi name we get from android
+char AP_SSID[40] = "AsakroboRemote";               //store name of wifi access point
+char AP_PASS[25] = "asakrobatic";                  //store password of wifi access point
 char socketResult[200];                            //store whole json result we get from android
-String eepromGetValue;                             //store value we get from EEPROM
-byte eepromGetValueCount;                          //store value counting for EEPROM read
+String eepromData;                                 //store value we get from EEPROM
+byte eepromDataCount;                              //store value counting for EEPROM read
 unsigned long startMillis;                         //Store time in milisecond for reset button
 unsigned long startMillisSocket;                   //Store time in milisecond for socket
 unsigned long currentMillis;                       //store current time for reset button
 unsigned long currentMillisSocket;                 //store current time for socket
 unsigned long period = 500;                        //store a value as period for using in reset button and socket auto disconnect
-int reqNewPassLength;                              //store length of new password we get from android
-int eepromAddressCount = 10;                       //EEPROM Address for storing password length
-int eepromAddress = 25;                            //EEPROM Address for storing password
+int reqNewNameLength;                              //store length of new wifi name we get from android
+int reqNewPassLength;                              //store length of new wifi password we get from android
+int eepromAmountAddressForWifiName = 60;           //EEPROM Address for storing wifi name length
+int eepromAddressForWifiName = 80;                 //EEPROM Address for storing wifi name
+int eepromAmountAddressForWifiPass = 10;           //EEPROM Address for storing wifi password length
+int eepromAddressForWifiPass = 30;                 //EEPROM Address for storing wifi password
 int buttonState = 0;                               //store the state of reset button
 int timeCounter = 0;                               //store amount of time elapssed for reset button
 int timeCounterSocket = 0;                         //store amount of time elapssed for socket
@@ -37,16 +41,14 @@ WebSocketsServer webSocket = WebSocketsServer(80); //webSocket variable and his 
 WiFiEventHandler stationDisconnectedHandler;       //event handler for wifi access point
 
 //Pins declaration
-const int gun1 = 5;            //first relay
-const int gun2 = 4;            //second relay
-const int gun3 = 15;           //third relay
-const int engine1_1 = 16;      //engine one, first pin
-const int engine1_2 = 13;      //enigne one, second pin
-const int engine1_enable = 14; //engine one, enable pin
-const int engine2_1 = 1;       //engine two, first pin
-const int engine2_2 = 2;       //engine two, second pin
-const int engine2_enable = 12; //engine two, enable pin
-const int pushButton = 3;      //reset button
+const int gun1 = 5;       //first relay
+const int gun2 = 4;       //second relay
+const int gun3 = 15;      //third relay
+const int engine1_1 = 16; //engine one, first pin
+const int engine1_2 = 14; //enigne one, second pin
+const int engine2_1 = 12; //engine two, first pin
+const int engine2_2 = 13; //engine two, second pin
+const int pushButton = 3; //reset button
 
 //Methods declaration
 void onWebSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length); //event handler for webSocket
@@ -54,10 +56,12 @@ void onStationDisconnected(const WiFiEventSoftAPModeStationDisconnected &evt);  
 void processJson();                                                                 //handle json data we get from android and do the proper job
 void sendStateToAndroid(String state);                                              //send only a state like "done" or "fail" to android
 void sendDataToAndroid(String state, float voltage);                                //send state and voltage to android
-void changePassEEPROM();                                                            //change the password in EEPROM
+void changeWifiName();                                                              //change the wifi name in EEPROM
+void changeWifiPass();                                                              //change the  wifi password in EEPROM
 void readResetBtn();                                                                //read the state of reset button and do factory reset if it is holded 3 second
 void autoSocketDisconnect();                                                        //automatically disconnect the socket if we get no data for 3 second
-String getPassFromEEPROM();                                                         //get wifi access point password from EEPROM
+String getWifiNameEEPROM();                                                         //get wifi access point name from EEPROM
+String getWifiPassEEPROM();                                                         //get wifi access point password from EEPROM
 
 void onWebSocketEvent(uint8_t num,
                       WStype_t type,
@@ -81,10 +85,8 @@ void onWebSocketEvent(uint8_t num,
     digitalWrite(gun3, LOW);
     digitalWrite(engine1_1, LOW);
     digitalWrite(engine1_2, LOW);
-    analogWrite(engine1_enable, 0);
     digitalWrite(engine2_1, LOW);
     digitalWrite(engine2_2, LOW);
-    analogWrite(engine2_enable, 0);
   case WStype_CONNECTED:
   case WStype_BIN:
   case WStype_ERROR:
@@ -109,10 +111,8 @@ void setup(void)
   pinMode(gun3, OUTPUT);
   pinMode(engine1_1, OUTPUT);
   pinMode(engine1_2, OUTPUT);
-  pinMode(engine1_enable, OUTPUT);
   pinMode(engine2_1, OUTPUT);
   pinMode(engine2_2, OUTPUT);
-  pinMode(engine2_enable, OUTPUT);
   pinMode(pushButton, INPUT_PULLUP);
   pinMode(A0, INPUT);
 
@@ -121,12 +121,11 @@ void setup(void)
   digitalWrite(gun3, LOW);
   digitalWrite(engine1_1, LOW);
   digitalWrite(engine1_2, LOW);
-  analogWrite(engine1_enable, 0);
   digitalWrite(engine2_1, LOW);
   digitalWrite(engine2_2, LOW);
-  analogWrite(engine2_enable, 0);
 
-  (getPassFromEEPROM()).toCharArray(AP_PASS, 30);                                            //get access point password from EEPROM and store it in AP_PASS
+  (getWifiNameEEPROM()).toCharArray(AP_SSID, 40);                                            //get access point name from EEPROM and store it in AP_SSID
+  (getWifiPassEEPROM()).toCharArray(AP_PASS, 25);                                            //get access point password from EEPROM and store it in AP_PASS
   WiFi.persistent(false);                                                                    //don't save the wifi state
   WiFi.mode(WIFI_AP);                                                                        //determine the wifi mode for accesss point
   WiFi.softAP(AP_SSID, AP_PASS, 5, false, 1);                                                //start Esp access point and limit it to 1 connection
@@ -140,7 +139,6 @@ void loop(void)
 {
   webSocket.loop(); //loop and handle WebSocket connections
   readResetBtn();   //constantly read button on Esp and if it holded 3 second then do a factory reset
-  delay(10);
 }
 
 void processJson()
@@ -169,8 +167,6 @@ void processJson()
       digitalWrite(engine1_2, HIGH);
       digitalWrite(engine2_1, HIGH);
       digitalWrite(engine2_2, LOW);
-      analogWrite(engine1_enable, motorStrength);
-      analogWrite(engine2_enable, motorStrength);
     }
     else if (((String)reqType).equals("motor_right"))
     {
@@ -182,8 +178,6 @@ void processJson()
       digitalWrite(engine1_2, LOW);
       digitalWrite(engine2_1, LOW);
       digitalWrite(engine2_2, HIGH);
-      analogWrite(engine1_enable, motorStrength);
-      analogWrite(engine2_enable, motorStrength);
     }
     else if (((String)reqType).equals("motor_forward"))
     {
@@ -195,8 +189,6 @@ void processJson()
       digitalWrite(engine1_2, LOW);
       digitalWrite(engine2_1, HIGH);
       digitalWrite(engine2_2, LOW);
-      analogWrite(engine1_enable, motorStrength);
-      analogWrite(engine2_enable, motorStrength);
     }
     else if (((String)reqType).equals("motor_backward"))
     {
@@ -208,8 +200,6 @@ void processJson()
       digitalWrite(engine1_2, HIGH);
       digitalWrite(engine2_1, LOW);
       digitalWrite(engine2_2, HIGH);
-      analogWrite(engine1_enable, motorStrength);
-      analogWrite(engine2_enable, motorStrength);
     }
     else if (((String)reqType).equals("motor_off"))
     {
@@ -222,8 +212,6 @@ void processJson()
       digitalWrite(engine1_2, LOW);
       digitalWrite(engine2_1, LOW);
       digitalWrite(engine2_2, LOW);
-      analogWrite(engine1_enable, 0);
-      analogWrite(engine2_enable, 0);
     }
     else if (((String)reqType).equals("gun1"))
     {
@@ -253,7 +241,7 @@ void processJson()
     }
     else if (((String)reqType).equals("gun3"))
     {
-      //request we get from android is "gun3"
+      //request we get from android is "gun3" GUN3 IS NOT HERE
       reqState = jsonDocRecv["state"];                        //extract state from json document
       myVoltFloat = ((analogRead(A0) * 3.3) / 1023.0) / 0.12; //calculate voltage with proper formula
       myVoltFloat = roundf(myVoltFloat * 100.0) / 100.0;      //round voltage to float with 2 decimal
@@ -270,11 +258,17 @@ void processJson()
         sendStateToAndroid("done"); //send response to android
       }
     }
-    else if (String(reqType).equals("changePassword"))
+    else if (String(reqType).equals("changeWifiPass"))
     {
       //request we get from android is "change_password"
-      reqNewPass = jsonDocRecv["newPassword"]; //extract newPassword from json document
-      changePassEEPROM();                      //change wifi access point of Esp in EEPROM and reset Esp
+      reqNewPass = jsonDocRecv["newWifiPass"]; //extract newPassword from json document
+      changeWifiPass();                        //change wifi access point of Esp in EEPROM and reset Esp
+    }
+    else if (String(reqType).equals("changeWifiName"))
+    {
+      //request we get from android is "change_password"
+      reqNewName = jsonDocRecv["newWifiName"]; //extract newPassword from json document
+      changeWifiName();
     }
   }
   else
@@ -311,19 +305,41 @@ void onStationDisconnected(const WiFiEventSoftAPModeStationDisconnected &evt)
   digitalWrite(gun3, LOW);
   digitalWrite(engine1_1, LOW);
   digitalWrite(engine1_2, LOW);
-  analogWrite(engine1_enable, 0);
   digitalWrite(engine2_1, LOW);
   digitalWrite(engine2_2, LOW);
-  analogWrite(engine2_enable, 0);
   webSocket.disconnect(globalSocketNum);
 }
 
-void changePassEEPROM()
+void changeWifiName()
+{
+  reqNewNameLength = strlen(reqNewName);
+  EEPROM.write(eepromAmountAddressForWifiName, reqNewNameLength); //write length of new wifi name on EEPROM
+  int x = 0;
+  for (int i = eepromAddressForWifiName; i < (eepromAddressForWifiName + reqNewNameLength); i++)
+  {
+    EEPROM.write(i, reqNewName[x]);
+    x++;
+  }
+  bool a = EEPROM.commit(); //store result of writing on EEPROM to a boolean
+  if (a == 1)
+  {
+    //we successfully write password on EEPROM
+    sendStateToAndroid("done"); //send response to android
+  }
+  else
+  {
+    sendStateToAndroid("fail"); //send response to android
+  }
+  delay(1000);
+  ESP.restart(); //restart Esp
+}
+
+void changeWifiPass()
 {
   reqNewPassLength = strlen(reqNewPass);
-  EEPROM.write(eepromAddressCount, reqNewPassLength); //write length of new password on EEPROM
+  EEPROM.write(eepromAmountAddressForWifiPass, reqNewPassLength); //write length of new wifi password on EEPROM
   int x = 0;
-  for (int i = eepromAddress; i < (eepromAddress + reqNewPassLength); i++)
+  for (int i = eepromAddressForWifiPass; i < (eepromAddressForWifiPass + reqNewPassLength); i++)
   {
     EEPROM.write(i, reqNewPass[x]);
     x++;
@@ -342,15 +358,26 @@ void changePassEEPROM()
   ESP.restart(); //restart Esp
 }
 
-String getPassFromEEPROM()
+String getWifiNameEEPROM()
 {
-  eepromGetValueCount = EEPROM.read(eepromAddressCount); //get length of password to from EEPROM
-  eepromGetValue = "";
-  for (int i = eepromAddress; i < (eepromAddress + eepromGetValueCount); i++)
+  eepromDataCount = EEPROM.read(eepromAmountAddressForWifiName); //get length of password to from EEPROM
+  eepromData = "";
+  for (int i = eepromAddressForWifiName; i < (eepromAddressForWifiName + eepromDataCount); i++)
   {
-    eepromGetValue = eepromGetValue + ((char)EEPROM.read(i));
+    eepromData = eepromData + ((char)EEPROM.read(i));
   }
-  return eepromGetValue; //return password we read from EEPROM for access point
+  return eepromData; //return NAME we read from EEPROM for access point
+}
+
+String getWifiPassEEPROM()
+{
+  eepromDataCount = EEPROM.read(eepromAmountAddressForWifiPass); //get length of password to from EEPROM
+  eepromData = "";
+  for (int i = eepromAddressForWifiPass; i < (eepromAddressForWifiPass + eepromDataCount); i++)
+  {
+    eepromData = eepromData + ((char)EEPROM.read(i));
+  }
+  return eepromData; //return password we read from EEPROM for access point
 }
 
 void readResetBtn()
@@ -368,14 +395,24 @@ void readResetBtn()
     }
     if (timeCounter == 6)
     {
-      //user pushed reset button for 3 seconds (500 * 6 = 3000 millisecond)
+      //user pushed reset button for 3 seconds (500 * 6 = 3000 millisecond) so we do a reset factory for ESP
       timeCounter = 0;
+      char defaultName[15] = "AsakroboRemote";
       char defaultPass[12] = "asakrobatic";
-      EEPROM.write(eepromAddressCount, 11);
+      EEPROM.write(eepromAmountAddressForWifiName, 14);
+      EEPROM.write(eepromAmountAddressForWifiPass, 11);
       int x = 0;
-      for (int i = eepromAddress; i < (eepromAddress + 11); i++)
+      int i = 0;
+      for (i = eepromAddressForWifiName; i < (eepromAddressForWifiName + 14); i++)
       {
-        EEPROM.write(i, defaultPass[x]); //write default password which is "asakrobatic" on EEPROM
+        EEPROM.write(i, defaultName[x]); //write default wifi name which is "AsakroboRemote" on EEPROM
+        x++;
+      }
+      x = 0;
+      i = 0;
+      for (i = eepromAddressForWifiPass; i < (eepromAddressForWifiPass + 11); i++)
+      {
+        EEPROM.write(i, defaultPass[x]); //write default wifi password which is "asakrobatic" on EEPROM
         x++;
       }
       EEPROM.commit();

@@ -12,13 +12,12 @@ import com.yarolegovich.lovelydialog.LovelyInfoDialog
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import org.json.JSONObject
-
+import kotlin.math.log
 
 class MainActivity : AppCompatActivity() {
 
     private var gun3State = false //state variable for changing the color of gun3
     private var joystickState = "" //state of joystick for sending to Esp
-    private var mappedStrength = 0 //strength of joystick after mapped from a range to another one
     private var onPaused = false //variable to determine if activity paused or stop
     private lateinit var handler: CoroutineExceptionHandler //handle exceptions of coroutines
     private lateinit var mSocket: WebSocket //the main socket
@@ -28,6 +27,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var websSocketFactory: WebSocketFactory //WebSocket factory
     private var tempVoltage: Double = 0.0 //variable to store Esp voltage
     private var mDialog: Dialog? = null //variable to store alert dialog
+    private var joystickOffFlag = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -109,55 +109,52 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
             finish()
         }
-        ma_jsv_joystick.setOnFocusChangeListener { _, hasFocus ->
-            //send request to Esp that turn off motors when joystick lost focus
-            if (!hasFocus) {
-                Log.d(Utils.TAG, "Joystick lost focus")
-                myJsonObject = JSONObject()
-                myJsonObject.put("token", "MataSecToken")
-                myJsonObject.put("androidReq", "motor_off")
-                socketSendData(myJsonObject)
-            }
+        ma_root_cl.setOnTouchListener { v, event ->
+            Log.d(Utils.TAG, "touch")
+            false
         }
         ma_jsv_joystick.setOnMoveListener({ angle, strength ->
+            joystickState = ""
             if (onPaused) {
-                //If user playing with joysticks and suddenly hit Home or Recent button in his device then in onPause method we set the onPaused variable to true and
+                //If user playing with joysticks and suddenly hit Home or Recent button in his device then in onPause and onStop method we set the onPaused variable to true
                 // here we send motor_off request to Esp
+                joystickState = "motor_off"
                 myJsonObject = JSONObject()
                 myJsonObject.put("token", "MataSecToken")
-                myJsonObject.put("androidReq", "motor_off")
+                myJsonObject.put("androidReq", joystickState)
                 socketSendData(myJsonObject)
                 return@setOnMoveListener
             }
             //fill out joystickState variable base on joystick angle to send to Esp
-            if (strength > 15 && (angle in 315..360 || angle in 0..45)) {
-                joystickState = "motor_right"
-            } else if (strength > 12 && angle in 45..135) {
-                joystickState = "motor_forward"
-            } else if (strength > 12 && angle in 135..225) {
-                joystickState = "motor_left"
-            } else if (strength > 12 && angle in 225..315) {
-                joystickState = "motor_backward"
-            } else if (strength < 12) {
-                joystickState = "motor_off"
+            joystickState = if(strength <= 13 && joystickOffFlag){
+                joystickOffFlag = false
+                "motor_off"
+            }else if (strength > 13 && (angle in 315..360 || angle in 0..45)) {
+                joystickOffFlag = true
+                "motor_right"
+            } else if (strength > 13 && angle in 45..135) {
+                joystickOffFlag = true
+                "motor_forward"
+            } else if (strength > 13 && angle in 135..225) {
+                joystickOffFlag = true
+                "motor_left"
+            } else if (strength > 13 && angle in 225..315) {
+                joystickOffFlag = true
+                "motor_backward"
+            }else{
+                ""
             }
-            //Map the strength of joystick from [0..100] to [X..1030] for PWM of Esp
-            mappedStrength = Utils.mapRange(IntRange(0, 100), IntRange(400, 1030), strength)
-            if (mappedStrength >= 1023)
-                mappedStrength = 1023
             //prepare json to send for Esp
             myJsonObject = JSONObject()
             myJsonObject.put("token", "MataSecToken")
             myJsonObject.put("androidReq", joystickState)
-            myJsonObject.put("strength", "$mappedStrength")
             socketSendData(myJsonObject)
-        }, 50) //Loop interval of joystick
-
+        }, 150) //Loop interval of joystick
     }
 
     //Method for create a new socket and append the listener to it
     private fun socketCreate() {
-        websSocketFactory = WebSocketFactory().setConnectionTimeout(2000) //socket timeout
+        websSocketFactory = WebSocketFactory().setConnectionTimeout(1200) //socket timeout
         mSocket = websSocketFactory.createSocket(socketURL) //create socket
         //socket listener
         mSocket.addListener(object : WebSocketAdapter() {
@@ -197,13 +194,13 @@ class MainActivity : AppCompatActivity() {
                     mSocket.connect() //if socket is created before then try to connect to it
                 } catch (e: java.lang.Exception) {
                     this.cancel() //cancel the coroutine
-                    showInfoDialog(
+                    /*showInfoDialog(
                         R.color.red_color,
                         R.drawable.ic_wifi_white_50dp,
                         getString(R.string.dialog_btn),
                         getString(R.string.wifi_dialog_title),
                         getString(R.string.wifi_dialog_message)
-                    ) //show the wifi problem dialog to user
+                    ) //show the wifi problem dialog to user*/
                 }
             }
             if (mSocket.isOpen) {

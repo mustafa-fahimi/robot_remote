@@ -4,15 +4,15 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
-import android.view.View
-import android.widget.Toast
+import android.view.Window
+import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import com.neovisionaries.ws.client.*
-import com.yarolegovich.lovelydialog.LovelyCustomDialog
 import com.yarolegovich.lovelydialog.LovelyInfoDialog
 import dmax.dialog.SpotsDialog
 import kotlinx.android.synthetic.main.activity_setting.*
+import kotlinx.android.synthetic.main.wifi_name_dialog.*
+import kotlinx.android.synthetic.main.wifi_pass_dialog.*
 import kotlinx.coroutines.*
 import org.json.JSONObject
 
@@ -27,6 +27,8 @@ class SettingActivity : AppCompatActivity() {
     private lateinit var websSocketFactory: WebSocketFactory //WebSocket factory
     private lateinit var progressDialog: AlertDialog //variable to store progress dialog
     private var mDialog: Dialog? = null //variable to store alert dialog
+    private lateinit var customDialog: Dialog
+    private lateinit var customLayoutParam: WindowManager.LayoutParams
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,36 +45,12 @@ class SettingActivity : AppCompatActivity() {
                 getString(R.string.fail_dialog_message)
             ) //show alert dialog for fail
         }
-
         sa_change_wifi_name_tv.setOnClickListener {
-
+            showChangeWifiNameDialog()
         }
-
-        /*sa_btn_submit.setOnClickListener {
-            when {
-                //check password editText is not empty and both are equal and bigger than 8 character
-                sa_et_newPassword.text.isNullOrEmpty() -> {
-                    sa_et_newPassword.error = "نباید خالی باشد"
-                    return@setOnClickListener
-                }
-                sa_et_newPassword.text.toString().length < 8 -> {
-                    sa_et_newPassword.error = "حداقل 8 کاراکتر باشد"
-                    return@setOnClickListener
-                }
-                sa_et_newPasswordAgain.text.toString() != sa_et_newPassword.text.toString() -> {
-                    sa_et_newPasswordAgain.error = "تکرار رمز اشتباه است"
-                    return@setOnClickListener
-                }
-            }
-            progressDialog() //show progress dialog
-            val newPassword = sa_et_newPassword.text.toString() //store the new password user entered in variable
-            //prepare json to send for Esp
-            myJsonObject = JSONObject()
-            myJsonObject.put("token", "MataSecToken")
-            myJsonObject.put("androidReq", "changePassword")
-            myJsonObject.put("newPassword", newPassword)
-            socketSendData(myJsonObject)
-        }*/
+        sa_change_wifi_pass_tv.setOnClickListener {
+            showChangeWifiPassDialog()
+        }
 
     }
 
@@ -203,6 +181,84 @@ class SettingActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun showChangeWifiPassDialog() {
+        customDialog = Dialog(this)
+        customDialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        customDialog.setContentView(R.layout.wifi_pass_dialog)
+        customDialog.setCancelable(false)
+        customLayoutParam = WindowManager.LayoutParams()
+        customLayoutParam.copyFrom(customDialog.window!!.attributes)
+        customLayoutParam.width = WindowManager.LayoutParams.WRAP_CONTENT
+        customLayoutParam.height = WindowManager.LayoutParams.WRAP_CONTENT
+        customDialog.wpd_btn_submit.setOnClickListener {
+            when {
+                //check password editText is not empty and both are equal and bigger than 8 character
+                customDialog.wpd_et_newPassword.text.isNullOrEmpty() -> {
+                    customDialog.wpd_et_newPassword.error = "نباید خالی باشد"
+                    return@setOnClickListener
+                }
+                customDialog.wpd_et_newPassword.text.toString().length < 8 -> {
+                    customDialog.wpd_et_newPassword.error = "حداقل 8 کاراکتر باشد"
+                    return@setOnClickListener
+                }
+                customDialog.wpd_et_newPasswordAgain.text.toString() != customDialog.wpd_et_newPasswordAgain.text.toString() -> {
+                    customDialog.wpd_et_newPasswordAgain.error = "تکرار رمز اشتباه است"
+                    return@setOnClickListener
+                }
+            }
+            progressDialog() //show progress dialog
+            val newPassword = customDialog.wpd_et_newPassword.text.toString() //store the new password user entered in variable
+            //prepare json to send for Esp
+            myJsonObject = JSONObject()
+            myJsonObject.put("token", "MataSecToken")
+            myJsonObject.put("androidReq", "changeWifiPass")
+            myJsonObject.put("newWifiPass", newPassword)
+            socketSendData(myJsonObject)
+        }
+        customDialog.wpd_btn_cancel.setOnClickListener {
+            customDialog.dismiss()
+        }
+        customDialog.show()
+        customDialog.window!!.attributes = customLayoutParam
+    }
+
+    private fun showChangeWifiNameDialog(){
+        customDialog = Dialog(this)
+        customDialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        customDialog.setContentView(R.layout.wifi_name_dialog)
+        customDialog.setCancelable(false)
+        customLayoutParam = WindowManager.LayoutParams()
+        customLayoutParam.copyFrom(customDialog.window!!.attributes)
+        customLayoutParam.width = WindowManager.LayoutParams.WRAP_CONTENT
+        customLayoutParam.height = WindowManager.LayoutParams.WRAP_CONTENT
+        customDialog.wnd_btn_submit.setOnClickListener {
+            when {
+                //check password editText is not empty and both are equal and bigger than 8 character
+                customDialog.wnd_et_newName.text.isNullOrEmpty() -> {
+                    customDialog.wnd_et_newName.error = "نباید خالی باشد"
+                    return@setOnClickListener
+                }
+                customDialog.wnd_et_newName.text.toString().length < 4 -> {
+                    customDialog.wnd_et_newName.error = "حداقل 4 کاراکتر باشد"
+                    return@setOnClickListener
+                }
+            }
+            progressDialog() //show progress dialog
+            val newName = customDialog.wnd_et_newName.text.toString() //store the new password user entered in variable
+            //prepare json to send for Esp
+            myJsonObject = JSONObject()
+            myJsonObject.put("token", "MataSecToken")
+            myJsonObject.put("androidReq", "changeWifiName")
+            myJsonObject.put("newWifiName", newName)
+            socketSendData(myJsonObject)
+        }
+        customDialog.wnd_btn_cancel.setOnClickListener {
+            customDialog.cancel()
+        }
+        customDialog.show()
+        customDialog.window!!.attributes = customLayoutParam
     }
 
     //show the progress dialog
