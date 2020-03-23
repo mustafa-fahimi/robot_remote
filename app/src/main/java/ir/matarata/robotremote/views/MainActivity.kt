@@ -1,4 +1,4 @@
-package ir.matarata.robotremote
+package ir.matarata.robotremote.views
 
 import android.app.Dialog
 import android.content.Intent
@@ -9,10 +9,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.neovisionaries.ws.client.*
 import com.yarolegovich.lovelydialog.LovelyInfoDialog
+import ir.matarata.robotremote.R
+import ir.matarata.robotremote.utils.Tools
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import org.json.JSONObject
-import kotlin.math.log
 
 class MainActivity : AppCompatActivity() {
 
@@ -33,7 +34,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        Utils.setSystemBarColor(this, R.color.darker_blue) //change the color of system bar
+        Tools.setSystemBarColor(this, R.color.darker_blue) //change the color of system bar
         socketCreate() //create socket for first time app start
         handler = CoroutineExceptionHandler { _, _ ->
             //change the text and textColor of connection state
@@ -110,7 +111,7 @@ class MainActivity : AppCompatActivity() {
             finish()
         }
         ma_root_cl.setOnTouchListener { v, event ->
-            Log.d(Utils.TAG, "touch")
+            Log.d(Tools.TAG, "touch")
             false
         }
         ma_jsv_joystick.setOnMoveListener({ angle, strength ->
@@ -126,19 +127,19 @@ class MainActivity : AppCompatActivity() {
                 return@setOnMoveListener
             }
             //fill out joystickState variable base on joystick angle to send to Esp
-            joystickState = if(strength <= 13 && joystickOffFlag){
+            joystickState = if(strength <= 70 && joystickOffFlag){
                 joystickOffFlag = false
                 "motor_off"
-            }else if (strength > 13 && (angle in 315..360 || angle in 0..45)) {
+            }else if (strength > 70 && (angle in 315..360 || angle in 0..45)) {
                 joystickOffFlag = true
                 "motor_right"
-            } else if (strength > 13 && angle in 45..135) {
+            } else if (strength > 70 && angle in 45..135) {
                 joystickOffFlag = true
                 "motor_forward"
-            } else if (strength > 13 && angle in 135..225) {
+            } else if (strength > 70 && angle in 135..225) {
                 joystickOffFlag = true
                 "motor_left"
-            } else if (strength > 13 && angle in 225..315) {
+            } else if (strength > 70 && angle in 225..315) {
                 joystickOffFlag = true
                 "motor_backward"
             }else{
@@ -149,7 +150,7 @@ class MainActivity : AppCompatActivity() {
             myJsonObject.put("token", "MataSecToken")
             myJsonObject.put("androidReq", joystickState)
             socketSendData(myJsonObject)
-        }, 150) //Loop interval of joystick
+        }, 10) //Loop interval of joystick
     }
 
     //Method for create a new socket and append the listener to it
@@ -194,13 +195,13 @@ class MainActivity : AppCompatActivity() {
                     mSocket.connect() //if socket is created before then try to connect to it
                 } catch (e: java.lang.Exception) {
                     this.cancel() //cancel the coroutine
-                    /*showInfoDialog(
+                    showInfoDialog(
                         R.color.red_color,
                         R.drawable.ic_wifi_white_50dp,
-                        getString(R.string.dialog_btn),
+                        getString(R.string.dialog_btn_confirm),
                         getString(R.string.wifi_dialog_title),
                         getString(R.string.wifi_dialog_message)
-                    ) //show the wifi problem dialog to user*/
+                    ) //show the wifi problem dialog to user
                 }
             }
             if (mSocket.isOpen) {
@@ -220,6 +221,12 @@ class MainActivity : AppCompatActivity() {
                     ma_tv_connectionState.text = getString(R.string.connection_state_connected) //change connection state textView
                     ma_tv_connectionState.setTextColor(ContextCompat.getColor(this@MainActivity, R.color.colorAccent)) //change connection state textView color
                     when (myJsonObject.getString("androidReq")) {
+                        "gun1" -> {
+                            //runs when current request was gun1
+                            //store the voltage that comes from Esp and show it
+                            tempVoltage = responseJsonObject.getDouble("voltage")
+                            ma_tv_batteryVoltage.text = "ولتاژ باتری موتور: $tempVoltage ولت"
+                        }
                         "gun2" -> {
                             //runs when current request was gun2
                             //store the voltage that comes from Esp and show it
@@ -249,6 +256,13 @@ class MainActivity : AppCompatActivity() {
                         gun3State = false
                         ma_btn_gun3.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.red_color)
                     }
+                    showInfoDialog(
+                        R.color.dark_red_color,
+                        R.drawable.ic_fail_white_50dp,
+                        getString(R.string.dialog_btn_save),
+                        getString(R.string.fail_dialog_title),
+                        getString(R.string.fail_dialog_message)
+                    ) //show alert dialog for fail
                 }
             } catch (e: Exception) {
                 //didn't get a response from Esp
@@ -258,6 +272,13 @@ class MainActivity : AppCompatActivity() {
                     gun3State = false //set gun3 state variable to on
                     ma_btn_gun3.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.red_color) //change the background color of gun3 to red
                 }
+                showInfoDialog(
+                    R.color.dark_red_color,
+                    R.drawable.ic_fail_white_50dp,
+                    getString(R.string.dialog_btn_save),
+                    getString(R.string.fail_dialog_title),
+                    getString(R.string.fail_dialog_message)
+                ) //show alert dialog for fail
             }
         }
     }

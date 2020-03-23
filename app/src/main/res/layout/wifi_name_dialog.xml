@@ -49,7 +49,7 @@
         app:nb_borderWidth="2dp"
         app:nb_focusColor="@color/grey_30"
         app:nb_radius="10dp"
-        app:nb_text="@string/dialog_btn"
+        app:nb_text="@string/dialog_btn_save"
         app:nb_textColor="@color/white_color"
         app:nb_textSize="20sp" />
 
@@ -68,7 +68,7 @@
         app:nb_borderWidth="2dp"
         app:nb_focusColor="@color/grey_30"
         app:nb_radius="10dp"
-        app:nb_text="@string/dialog_btn_negative"
+        app:nb_text="@string/dialog_btn_cancel"
         app:nb_textColor="@color/white_color"
         app:nb_textSize="20sp" />
 

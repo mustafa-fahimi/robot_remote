@@ -1,4 +1,4 @@
-package ir.matarata.robotremote
+package ir.matarata.robotremote.views
 
 import android.app.AlertDialog
 import android.app.Dialog
@@ -6,11 +6,16 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Window
 import android.view.WindowManager
+import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import com.neovisionaries.ws.client.*
+import com.varunest.sparkbutton.SparkEventListener
 import com.yarolegovich.lovelydialog.LovelyInfoDialog
 import dmax.dialog.SpotsDialog
+import ir.matarata.robotremote.R
+import ir.matarata.robotremote.utils.Tools
 import kotlinx.android.synthetic.main.activity_setting.*
+import kotlinx.android.synthetic.main.relay1_dialog.*
 import kotlinx.android.synthetic.main.wifi_name_dialog.*
 import kotlinx.android.synthetic.main.wifi_pass_dialog.*
 import kotlinx.coroutines.*
@@ -34,13 +39,13 @@ class SettingActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_setting)
 
-        Utils.setSystemBarColor(this, R.color.darker_blue) //change the color of system bar
+        Tools.setSystemBarColor(this, R.color.darker_blue) //change the color of system bar
         socketCreate() //create socket for first time app start
         handler = CoroutineExceptionHandler { _, _ ->
             showInfoDialog(
                 R.color.dark_red_color,
                 R.drawable.ic_fail_white_50dp,
-                getString(R.string.dialog_btn),
+                getString(R.string.dialog_btn_save),
                 getString(R.string.fail_dialog_title),
                 getString(R.string.fail_dialog_message)
             ) //show alert dialog for fail
@@ -50,6 +55,9 @@ class SettingActivity : AppCompatActivity() {
         }
         sa_change_wifi_pass_tv.setOnClickListener {
             showChangeWifiPassDialog()
+        }
+        sa_relay1_type_tv.setOnClickListener {
+            showRelay1TypeDialog()
         }
 
     }
@@ -100,7 +108,7 @@ class SettingActivity : AppCompatActivity() {
                     showInfoDialog(
                         R.color.red_color,
                         R.drawable.ic_wifi_white_50dp,
-                        getString(R.string.dialog_btn),
+                        getString(R.string.dialog_btn_save),
                         getString(R.string.wifi_dialog_title),
                         getString(R.string.wifi_dialog_message)
                     ) //show the wifi problem dialog to user
@@ -120,33 +128,36 @@ class SettingActivity : AppCompatActivity() {
                 responseJsonObject = JSONObject(res) //create a json object from string response of Esp
                 if (responseJsonObject.getString("espResult") == "done") {
                     //response from Esp is "done"
-                    delay(2500)
+                    delay(2000)
                     progressDialog.cancel()
+                    customDialog.dismiss()
                     //sa_et_newPassword.text?.clear()
                     //sa_et_newPasswordAgain.text?.clear()
                     showInfoDialog(
                         R.color.colorAccent,
                         R.drawable.ic_done_white_50dp,
-                        getString(R.string.dialog_btn),
+                        getString(R.string.dialog_btn_confirm),
                         getString(R.string.success_dialog_title),
                         getString(R.string.success_dialog_message)
                     ) //show alert dialog for success
                 } else if (responseJsonObject.getString("espResult") == "fail") {
                     //response from Esp is "fail"
+                    progressDialog.cancel()
                     showInfoDialog(
                         R.color.dark_red_color,
                         R.drawable.ic_fail_white_50dp,
-                        getString(R.string.dialog_btn),
+                        getString(R.string.dialog_btn_confirm),
                         getString(R.string.fail_dialog_title),
                         getString(R.string.fail_dialog_message)
                     ) //show alert dialog for fail
                 }
             } catch (e: Exception) {
                 //didn't get a response from Esp
+                progressDialog.cancel()
                 showInfoDialog(
                     R.color.dark_red_color,
                     R.drawable.ic_fail_white_50dp,
-                    getString(R.string.dialog_btn),
+                    getString(R.string.dialog_btn_confirm),
                     getString(R.string.fail_dialog_title),
                     getString(R.string.fail_dialog_message)
                 ) //show alert dialog for fail
@@ -156,7 +167,6 @@ class SettingActivity : AppCompatActivity() {
 
     //create and show the alert dialog for wifi problem
     private fun showInfoDialog(topColor: Int, icon: Int, btnText: String, title: String, message: String) {
-        progressDialog.dismiss()
         //create a coroutine in Main thread and append handler to it
         CoroutineScope(Dispatchers.Main + handler).launch {
             if (mDialog == null) {
@@ -224,7 +234,7 @@ class SettingActivity : AppCompatActivity() {
         customDialog.window!!.attributes = customLayoutParam
     }
 
-    private fun showChangeWifiNameDialog(){
+    private fun showChangeWifiNameDialog() {
         customDialog = Dialog(this)
         customDialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         customDialog.setContentView(R.layout.wifi_name_dialog)
@@ -256,6 +266,62 @@ class SettingActivity : AppCompatActivity() {
         }
         customDialog.wnd_btn_cancel.setOnClickListener {
             customDialog.cancel()
+        }
+        customDialog.show()
+        customDialog.window!!.attributes = customLayoutParam
+    }
+
+    private fun showRelay1TypeDialog() {
+        customDialog = Dialog(this)
+        customDialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
+        customDialog.setContentView(R.layout.relay1_dialog)
+        customDialog.setCancelable(false)
+        customLayoutParam = WindowManager.LayoutParams()
+        customLayoutParam.copyFrom(customDialog.window!!.attributes)
+        customLayoutParam.width = WindowManager.LayoutParams.WRAP_CONTENT
+        customLayoutParam.height = WindowManager.LayoutParams.WRAP_CONTENT
+        customDialog.r1d_single_shot_btn.setEventListener(object : SparkEventListener {
+            override fun onEventAnimationEnd(button: ImageView?, buttonState: Boolean) {}
+            override fun onEventAnimationStart(button: ImageView?, buttonState: Boolean) {}
+            override fun onEvent(button: ImageView?, buttonState: Boolean) {
+                if (buttonState){
+                    customDialog.r1d_multi_shot_btn.isChecked = false
+                    customDialog.r1d_switch_btn.isChecked = false
+                }else{
+                    customDialog.r1d_multi_shot_btn.playAnimation()
+                    customDialog.r1d_multi_shot_btn.isChecked = true
+                }
+            }
+        })
+        customDialog.r1d_multi_shot_btn.setEventListener(object : SparkEventListener {
+            override fun onEventAnimationEnd(button: ImageView?, buttonState: Boolean) {}
+            override fun onEventAnimationStart(button: ImageView?, buttonState: Boolean) {}
+            override fun onEvent(button: ImageView?, buttonState: Boolean) {
+                if (buttonState){
+                    customDialog.r1d_single_shot_btn.isChecked = false
+                    customDialog.r1d_switch_btn.isChecked = false
+                }else{
+                    customDialog.r1d_single_shot_btn.playAnimation()
+                    customDialog.r1d_single_shot_btn.isChecked = true
+                }
+            }
+        })
+        customDialog.r1d_switch_btn.setEventListener(object : SparkEventListener {
+            override fun onEventAnimationEnd(button: ImageView?, buttonState: Boolean) {}
+            override fun onEventAnimationStart(button: ImageView?, buttonState: Boolean) {}
+            override fun onEvent(button: ImageView?, buttonState: Boolean) {
+                if (buttonState){
+                    customDialog.r1d_single_shot_btn.isChecked = false
+                    customDialog.r1d_multi_shot_btn.isChecked = false
+                }else{
+                    customDialog.r1d_single_shot_btn.playAnimation()
+                    customDialog.r1d_single_shot_btn.isChecked = true
+                }
+            }
+        })
+        customDialog.r1d_save_btn.setOnClickListener {  }
+        customDialog.r1d_cancel_btn.setOnClickListener {
+            customDialog.dismiss()
         }
         customDialog.show()
         customDialog.window!!.attributes = customLayoutParam

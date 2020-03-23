@@ -16,17 +16,22 @@
     <string name="battery_voltage">ولتاژ موتور: نامعلوم</string>
     <string name="wifi_dialog_title">اتصال وای فای</string>
     <string name="wifi_dialog_message">از متصل بودن وای فای به ماژول اطمینان حاصل نمایید.</string>
-    <string name="dialog_btn">تایید</string>
-    <string name="dialog_btn_negative">لغو</string>
+    <string name="dialog_btn_confirm">تایید</string>
+    <string name="dialog_btn_save">ذخیره</string>
+    <string name="dialog_btn_cancel">لغو</string>
     <string name="success_dialog_title">ثبت با موفقیت</string>
     <string name="success_dialog_message">اطلاعات جدید با موفقیت در ریموت ثبت گردید.</string>
     <string name="fail_dialog_title">خطا در ثبت</string>
     <string name="fail_dialog_message">خطایی رخ داده است. لطفا مجددا تلاش نمایید.</string>
     <string name="progress_dialog_title">لطفا منتظر بمانید…</string>
     <string name="wifi_settings">تنظیمات وای فای</string>
+    <string name="relays_settings">تنظیمات رله ها</string>
     <string name="change_wifi_password">تغییر رمز عبور وای فای</string>
     <string name="share_app">اشتراک برنامه</string>
     <string name="about_us">درباره ما</string>
     <string name="version_number">نسخه 1.0</string>
     <string name="change_wifi_name">تغییر نام وای فای</string>
+    <string name="relay1_type">نوع رله اول</string>
+    <string name="relay2_type">نوع رله دوم</string>
+    <string name="relay3_type">نوع رله سوم</string>
 </resources>

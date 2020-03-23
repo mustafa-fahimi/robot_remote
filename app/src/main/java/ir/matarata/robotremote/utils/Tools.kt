@@ -1,4 +1,4 @@
-package ir.matarata.robotremote
+package ir.matarata.robotremote.utils
 
 import android.app.Activity
 import android.os.Build
@@ -7,7 +7,7 @@ import android.view.WindowManager
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
 
-object Utils {
+object Tools {
 
     const val TAG = "MATATAG" //Tag for logging
 

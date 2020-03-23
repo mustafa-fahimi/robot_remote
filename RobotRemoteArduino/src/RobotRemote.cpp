@@ -126,7 +126,7 @@ void setup(void)
 
   (getWifiNameEEPROM()).toCharArray(AP_SSID, 40);                                            //get access point name from EEPROM and store it in AP_SSID
   (getWifiPassEEPROM()).toCharArray(AP_PASS, 25);                                            //get access point password from EEPROM and store it in AP_PASS
-  WiFi.persistent(false);                                                                    //don't save the wifi state
+  WiFi.persistent(true);                                                                    //don't save the wifi state
   WiFi.mode(WIFI_AP);                                                                        //determine the wifi mode for accesss point
   WiFi.softAP(AP_SSID, AP_PASS, 5, false, 1);                                                //start Esp access point and limit it to 1 connection
   stationDisconnectedHandler = WiFi.onSoftAPModeStationDisconnected(&onStationDisconnected); //access point disconnection handler

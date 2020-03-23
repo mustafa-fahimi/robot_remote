@@ -1,4 +1,4 @@
-package ir.matarata.robotremote
+package ir.matarata.robotremote.utils
 
 import android.app.Application
 

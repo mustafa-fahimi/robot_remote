@@ -3,11 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:custom="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/ma_root_cl"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/dark_blue"
-    tools:context=".MainActivity"
-    android:id="@+id/ma_root_cl">
+    tools:context=".views.MainActivity">
 
     <io.github.controlwear.virtual.joystick.android.JoystickView
         android:id="@+id/ma_jsv_joystick"
@@ -29,12 +29,11 @@
         android:id="@+id/ma_btn_gun1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="16dp"
+        android:padding="12dp"
         app:layout_constraintBottom_toTopOf="@+id/ma_btn_gun2"
-        app:layout_constraintEnd_toStartOf="@+id/ma_jsv_joystick"
-        app:layout_constraintHorizontal_bias="0.2"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/ma_tv_connectionState"
+        app:layout_constraintStart_toStartOf="@+id/ma_tv_connectionState"
+        app:layout_constraintTop_toBottomOf="@+id/ma_tv_batteryVoltage"
         app:nb_backgroundColor="@color/dark_red_color"
         app:nb_borderColor="@color/white_color"
         app:nb_borderWidth="2dp"
@@ -46,9 +45,9 @@
 
     <com.ornach.nobobutton.NoboButton
         android:id="@+id/ma_btn_gun2"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:padding="16dp"
+        android:padding="12dp"
         app:layout_constraintBottom_toTopOf="@+id/ma_btn_gun3"
         app:layout_constraintEnd_toEndOf="@+id/ma_btn_gun1"
         app:layout_constraintStart_toStartOf="@+id/ma_btn_gun1"
@@ -64,10 +63,10 @@
 
     <com.ornach.nobobutton.NoboButton
         android:id="@+id/ma_btn_gun3"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:padding="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:padding="12dp"
+        app:layout_constraintBottom_toTopOf="@+id/ma_tv_connectionState"
         app:layout_constraintEnd_toEndOf="@+id/ma_btn_gun1"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="@+id/ma_btn_gun1"
@@ -88,6 +87,8 @@
         android:text="@string/connection_state_unknown"
         android:textColor="@color/white_color"
         android:textSize="19sp"
+        android:textStyle="bold"
+        app:layout_constraintHorizontal_bias="0.07"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -97,13 +98,14 @@
         android:id="@+id/ma_tv_batteryVoltage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="right"
+        android:gravity="left"
         android:text="@string/battery_voltage"
         android:textColor="@color/white_color"
-        android:textSize="21sp"
+        android:textSize="19sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/ma_btn_gun1"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.07"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
