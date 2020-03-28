@@ -3,22 +3,27 @@ package ir.matarata.robotremote.views
 import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.MotionEvent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import com.neovisionaries.ws.client.*
+import com.ornach.nobobutton.NoboButton
 import com.yarolegovich.lovelydialog.LovelyInfoDialog
 import ir.matarata.robotremote.R
+import ir.matarata.robotremote.models.RelaysEntity
 import ir.matarata.robotremote.utils.Tools
+import ir.matarata.robotremote.viewmodels.RelaysVM
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.*
 import org.json.JSONObject
 
 class MainActivity : AppCompatActivity() {
 
-    private var gun3State = false //state variable for changing the color of gun3
-    private var joystickState = "" //state of joystick for sending to Esp
+    private var relay1State = false //state variable for changing the color of relay1
+    private var relay2State = false //state variable for changing the color of relay2
+    private var relay3State = false //state variable for changing the color of relay3
     private var onPaused = false //variable to determine if activity paused or stop
     private lateinit var handler: CoroutineExceptionHandler //handle exceptions of coroutines
     private lateinit var mSocket: WebSocket //the main socket
@@ -28,13 +33,14 @@ class MainActivity : AppCompatActivity() {
     private lateinit var websSocketFactory: WebSocketFactory //WebSocket factory
     private var tempVoltage: Double = 0.0 //variable to store Esp voltage
     private var mDialog: Dialog? = null //variable to store alert dialog
-    private var joystickOffFlag = false
+    private lateinit var relaysVM: RelaysVM
+    private lateinit var relaysData: List<RelaysEntity>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        Tools.setSystemBarColor(this, R.color.darker_blue) //change the color of system bar
+        Tools.setSystemBarColor(this, R.color.steel_blue) //change the color of system bar
         socketCreate() //create socket for first time app start
         handler = CoroutineExceptionHandler { _, _ ->
             //change the text and textColor of connection state
@@ -42,65 +48,48 @@ class MainActivity : AppCompatActivity() {
             ma_tv_connectionState.setTextColor(ContextCompat.getColor(this, R.color.red_color))
         }
 
-        ma_btn_gun1.setOnTouchListener { _, event ->
+        relaysVM = ViewModelProvider(this).get(RelaysVM::class.java)
+        relaysVM.allRelaysData.observe(this, Observer { data ->
+            data?.let {
+                relaysData = data
+                ma_btn_relay1.text = relaysData[0].relayTitle
+                ma_btn_relay2.text = relaysData[1].relayTitle
+                ma_btn_relay3.text = relaysData[2].relayTitle
+            }
+        })
+
+        ma_btn_relay1.setOnTouchListener { _, event ->
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
-                    //change the background color of gun1 to green
-                    ma_btn_gun1.backgroundColor = ContextCompat.getColor(this, R.color.colorAccent)
-                    //prepare json to send for Esp
-                    myJsonObject = JSONObject()
-                    myJsonObject.put("token", "MataSecToken")
-                    myJsonObject.put("androidReq", "gun1")
-                    socketSendData(myJsonObject)
+                    relayButtonPressHandler(ma_btn_relay1, "relay1", relaysData[0].relayType, "pressed")
                 }
                 MotionEvent.ACTION_UP -> {
-                    //change the background color of gun1 to red
-                    ma_btn_gun1.backgroundColor = ContextCompat.getColor(this, R.color.red_color)
+                    relayButtonPressHandler(ma_btn_relay1, "relay1", relaysData[0].relayType, "released")
                 }
             }
-            true
+            false
         }
-        ma_btn_gun2.setOnTouchListener { _, event ->
+        ma_btn_relay2.setOnTouchListener { _, event ->
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
-                    //change the background color of gun2 to green
-                    ma_btn_gun2.backgroundColor = ContextCompat.getColor(this, R.color.colorAccent)
-                    //prepare json to send for Esp
-                    myJsonObject = JSONObject()
-                    myJsonObject.put("token", "MataSecToken")
-                    myJsonObject.put("androidReq", "gun2")
-                    myJsonObject.put("state", "on")
-                    socketSendData(myJsonObject)
+                    relayButtonPressHandler(ma_btn_relay2, "relay2", relaysData[1].relayType, "pressed")
                 }
                 MotionEvent.ACTION_UP -> {
-                    //change the background color of gun2 to red
-                    ma_btn_gun2.backgroundColor = ContextCompat.getColor(this, R.color.red_color)
-                    //prepare json to send for Esp
-                    myJsonObject = JSONObject()
-                    myJsonObject.put("token", "MataSecToken")
-                    myJsonObject.put("androidReq", "gun2")
-                    myJsonObject.put("state", "off")
-                    socketSendData(myJsonObject)
+                    relayButtonPressHandler(ma_btn_relay2, "relay2", relaysData[1].relayType, "released")
                 }
             }
-            true
+            false
         }
-        ma_btn_gun3.setOnClickListener {
-            if (!gun3State) {
-                //prepare json to send for Esp
-                myJsonObject = JSONObject()
-                myJsonObject.put("token", "MataSecToken")
-                myJsonObject.put("androidReq", "gun3")
-                myJsonObject.put("state", "on")
-                socketSendData(myJsonObject)
-            } else if (gun3State) {
-                //prepare json to send for Esp
-                myJsonObject = JSONObject()
-                myJsonObject.put("token", "MataSecToken")
-                myJsonObject.put("androidReq", "gun3")
-                myJsonObject.put("state", "off")
-                socketSendData(myJsonObject)
+        ma_btn_relay3.setOnTouchListener { _, event ->
+            when (event.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    relayButtonPressHandler(ma_btn_relay3, "relay3", relaysData[2].relayType, "pressed")
+                }
+                MotionEvent.ACTION_UP -> {
+                    relayButtonPressHandler(ma_btn_relay3, "relay3", relaysData[2].relayType, "released")
+                }
             }
+            false
         }
         ma_btn_settings.setOnClickListener {
             //send socket close request to Esp and then disconnect
@@ -110,47 +99,74 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
             finish()
         }
-        ma_root_cl.setOnTouchListener { v, event ->
-            Log.d(Tools.TAG, "touch")
+        ma_iv_up.setOnTouchListener { _, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    myJsonObject = JSONObject()
+                    myJsonObject.put("token", "MataSecToken")
+                    myJsonObject.put("androidReq", "motor_forward")
+                    socketSendData(myJsonObject)
+                }
+                MotionEvent.ACTION_UP -> {
+                    myJsonObject = JSONObject()
+                    myJsonObject.put("token", "MataSecToken")
+                    myJsonObject.put("androidReq", "motor_off")
+                    socketSendData(myJsonObject)
+                }
+            }
             false
         }
-        ma_jsv_joystick.setOnMoveListener({ angle, strength ->
-            joystickState = ""
-            if (onPaused) {
-                //If user playing with joysticks and suddenly hit Home or Recent button in his device then in onPause and onStop method we set the onPaused variable to true
-                // here we send motor_off request to Esp
-                joystickState = "motor_off"
-                myJsonObject = JSONObject()
-                myJsonObject.put("token", "MataSecToken")
-                myJsonObject.put("androidReq", joystickState)
-                socketSendData(myJsonObject)
-                return@setOnMoveListener
+        ma_iv_down.setOnTouchListener { _, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    myJsonObject = JSONObject()
+                    myJsonObject.put("token", "MataSecToken")
+                    myJsonObject.put("androidReq", "motor_backward")
+                    socketSendData(myJsonObject)
+                }
+                MotionEvent.ACTION_UP -> {
+                    myJsonObject = JSONObject()
+                    myJsonObject.put("token", "MataSecToken")
+                    myJsonObject.put("androidReq", "motor_off")
+                    socketSendData(myJsonObject)
+                }
             }
-            //fill out joystickState variable base on joystick angle to send to Esp
-            joystickState = if(strength <= 70 && joystickOffFlag){
-                joystickOffFlag = false
-                "motor_off"
-            }else if (strength > 70 && (angle in 315..360 || angle in 0..45)) {
-                joystickOffFlag = true
-                "motor_right"
-            } else if (strength > 70 && angle in 45..135) {
-                joystickOffFlag = true
-                "motor_forward"
-            } else if (strength > 70 && angle in 135..225) {
-                joystickOffFlag = true
-                "motor_left"
-            } else if (strength > 70 && angle in 225..315) {
-                joystickOffFlag = true
-                "motor_backward"
-            }else{
-                ""
+            false
+        }
+        ma_iv_right.setOnTouchListener { _, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    myJsonObject = JSONObject()
+                    myJsonObject.put("token", "MataSecToken")
+                    myJsonObject.put("androidReq", "motor_right")
+                    socketSendData(myJsonObject)
+                }
+                MotionEvent.ACTION_UP -> {
+                    myJsonObject = JSONObject()
+                    myJsonObject.put("token", "MataSecToken")
+                    myJsonObject.put("androidReq", "motor_off")
+                    socketSendData(myJsonObject)
+                }
             }
-            //prepare json to send for Esp
-            myJsonObject = JSONObject()
-            myJsonObject.put("token", "MataSecToken")
-            myJsonObject.put("androidReq", joystickState)
-            socketSendData(myJsonObject)
-        }, 10) //Loop interval of joystick
+            false
+        }
+        ma_iv_left.setOnTouchListener { _, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    myJsonObject = JSONObject()
+                    myJsonObject.put("token", "MataSecToken")
+                    myJsonObject.put("androidReq", "motor_left")
+                    socketSendData(myJsonObject)
+                }
+                MotionEvent.ACTION_UP -> {
+                    myJsonObject = JSONObject()
+                    myJsonObject.put("token", "MataSecToken")
+                    myJsonObject.put("androidReq", "motor_off")
+                    socketSendData(myJsonObject)
+                }
+            }
+            false
+        }
     }
 
     //Method for create a new socket and append the listener to it
@@ -221,64 +237,40 @@ class MainActivity : AppCompatActivity() {
                     ma_tv_connectionState.text = getString(R.string.connection_state_connected) //change connection state textView
                     ma_tv_connectionState.setTextColor(ContextCompat.getColor(this@MainActivity, R.color.colorAccent)) //change connection state textView color
                     when (myJsonObject.getString("androidReq")) {
-                        "gun1" -> {
-                            //runs when current request was gun1
+                        "relay1" -> {
+                            //runs when current request was relay1
                             //store the voltage that comes from Esp and show it
                             tempVoltage = responseJsonObject.getDouble("voltage")
                             ma_tv_batteryVoltage.text = "ولتاژ باتری موتور: $tempVoltage ولت"
                         }
-                        "gun2" -> {
-                            //runs when current request was gun2
+                        "relay2" -> {
+                            //runs when current request was relay2
                             //store the voltage that comes from Esp and show it
                             tempVoltage = responseJsonObject.getDouble("voltage")
                             ma_tv_batteryVoltage.text = "ولتاژ باتری موتور: $tempVoltage ولت"
                         }
-                        "gun3" -> {
-                            //runs when current request was gun3
+                        "relay3" -> {
+                            //runs when current request was relay3
                             if (myJsonObject.getString("state") == "on") {
-                                //current request of gun3 is "on" and run this
-                                gun3State = true //set gun3 state variable to on
-                                //store the voltage that comes from Esp and show it and change the background color of gun3 to green
+                                //current request of relay3 is "on" and run this
+                                relay3State = true //set relay3 state variable to on
+                                //store the voltage that comes from Esp and show it and change the background color of relay3 to green
                                 tempVoltage = responseJsonObject.getDouble("voltage")
                                 ma_tv_batteryVoltage.text = "ولتاژ باتری موتور: $tempVoltage ولت"
-                                ma_btn_gun3.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.colorAccent)
+                                ma_btn_relay3.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.colorAccent)
                             } else if (myJsonObject.getString("state") == "off") {
-                                gun3State = false //set gun3 state variable to on
-                                ma_btn_gun3.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.red_color) //change the background color of gun3 to red
+                                relay3State = false //set relay3 state variable to on
+                                ma_btn_relay3.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.red_color) //change the background color of relay3 to red
                             }
                         }
                     }
                 } else if (responseJsonObject.getString("espResult") == "fail") {
                     //response from Esp is "fail"
-                    ma_tv_connectionState.text = getString(R.string.connection_state_problem) //change connection state textView
-                    ma_tv_connectionState.setTextColor(ContextCompat.getColor(this@MainActivity, R.color.red_color)) //change connection state textView color to red
-                    if (myJsonObject.getString("androidReq") == "gun3") {
-                        gun3State = false
-                        ma_btn_gun3.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.red_color)
-                    }
-                    showInfoDialog(
-                        R.color.dark_red_color,
-                        R.drawable.ic_fail_white_50dp,
-                        getString(R.string.dialog_btn_save),
-                        getString(R.string.fail_dialog_title),
-                        getString(R.string.fail_dialog_message)
-                    ) //show alert dialog for fail
+                    failResponseFromEsp()
                 }
             } catch (e: Exception) {
                 //didn't get a response from Esp
-                ma_tv_connectionState.text = getString(R.string.connection_state_problem) //change connection state textView
-                ma_tv_connectionState.setTextColor(ContextCompat.getColor(this@MainActivity, R.color.red_color)) //change connection state textView color to red
-                if (myJsonObject.getString("androidReq") == "gun3") {
-                    gun3State = false //set gun3 state variable to on
-                    ma_btn_gun3.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.red_color) //change the background color of gun3 to red
-                }
-                showInfoDialog(
-                    R.color.dark_red_color,
-                    R.drawable.ic_fail_white_50dp,
-                    getString(R.string.dialog_btn_save),
-                    getString(R.string.fail_dialog_title),
-                    getString(R.string.fail_dialog_message)
-                ) //show alert dialog for fail
+                failResponseFromEsp()
             }
         }
     }
@@ -289,8 +281,8 @@ class MainActivity : AppCompatActivity() {
         CoroutineScope(Dispatchers.Main + handler).launch {
             ma_tv_connectionState.text = getString(R.string.connection_state_problem) //change connection state textView
             ma_tv_connectionState.setTextColor(ContextCompat.getColor(this@MainActivity, R.color.red_color)) //change connection state textView color to red
-            gun3State = false //set gun3 state variable to on
-            ma_btn_gun3.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.red_color) //change the background color of gun3 to red
+            relay3State = false //set relay3 state variable to on
+            ma_btn_relay3.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.red_color) //change the background color of relay3 to red
             if (mDialog == null) {
                 //its the first time to showing dialog so we create it here and show
                 mDialog = LovelyInfoDialog(this@MainActivity)
@@ -315,6 +307,184 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun relayButtonPressHandler(relayRelatedBtn: NoboButton, relayNumber: String, relayType: String, actionType: String) {
+        var currentRelayState = false
+        when (relayNumber) {
+            "relay1" -> {
+                currentRelayState = relay1State
+            }
+            "relay2" -> {
+                currentRelayState = relay2State
+            }
+            "relay3" -> {
+                currentRelayState = relay3State
+            }
+        }
+        if (actionType == "pressed") {
+            when (relayType) {
+                "single" -> {
+                    //change the background color of relay to green
+                    relayRelatedBtn.backgroundColor = ContextCompat.getColor(this, R.color.colorAccent)
+                    //prepare json to send for Esp
+                    myJsonObject = JSONObject()
+                    myJsonObject.put("token", "MataSecToken")
+                    myJsonObject.put("androidReq", relayNumber)
+                    myJsonObject.put("relayType", "single")
+                    socketSendData(myJsonObject)
+                }
+                "multi" -> {
+                    //change the background color of relay to green
+                    relayRelatedBtn.backgroundColor = ContextCompat.getColor(this, R.color.colorAccent)
+                    //prepare json to send for Esp
+                    myJsonObject = JSONObject()
+                    myJsonObject.put("token", "MataSecToken")
+                    myJsonObject.put("androidReq", relayNumber)
+                    myJsonObject.put("relayType", "multi")
+                    myJsonObject.put("state", "on")
+                    socketSendData(myJsonObject)
+                }
+                "switch" -> {
+                    if (!currentRelayState) {
+                        //prepare json to send for Esp
+                        myJsonObject = JSONObject()
+                        myJsonObject.put("token", "MataSecToken")
+                        myJsonObject.put("androidReq", relayNumber)
+                        myJsonObject.put("relayType", "switch")
+                        myJsonObject.put("state", "on")
+                        socketSendData(myJsonObject)
+                    } else if (currentRelayState) {
+                        //prepare json to send for Esp
+                        myJsonObject = JSONObject()
+                        myJsonObject.put("token", "MataSecToken")
+                        myJsonObject.put("androidReq", relayNumber)
+                        myJsonObject.put("relayType", "switch")
+                        myJsonObject.put("state", "off")
+                        socketSendData(myJsonObject)
+                    }
+                }
+            }
+        } else if (actionType == "released") {
+            when (relayType) {
+                "single" -> {
+                    //change the background color of relay to red
+                    ma_btn_relay1.backgroundColor = ContextCompat.getColor(this, R.color.red_color)
+                }
+                "multi" -> {
+                    //change the background color of relay to green
+                    relayRelatedBtn.backgroundColor = ContextCompat.getColor(this, R.color.red_color)
+                    //prepare json to send for Esp
+                    myJsonObject = JSONObject()
+                    myJsonObject.put("token", "MataSecToken")
+                    myJsonObject.put("androidReq", relayNumber)
+                    myJsonObject.put("relayType", "multi")
+                    myJsonObject.put("state", "off")
+                    socketSendData(myJsonObject)
+                }
+            }
+        }
+    }
+    
+    private fun successResponseFromEsp(){
+        when (myJsonObject.getString("relayType")) {
+            "single" -> {
+                //store the voltage that comes from Esp and show it
+                tempVoltage = responseJsonObject.getDouble("voltage")
+                ma_tv_batteryVoltage.text = "ولتاژ باتری موتور: $tempVoltage ولت"
+            }
+            "multi" -> {
+                //store the voltage that comes from Esp and show it
+                tempVoltage = responseJsonObject.getDouble("voltage")
+                ma_tv_batteryVoltage.text = "ولتاژ باتری موتور: $tempVoltage ولت"
+            }
+            "switch" -> {
+                when(myJsonObject.getString("androidReq")){
+                    "relay1" ->{
+                        if (myJsonObject.getString("state") == "on") {
+                            //current request of relay1 is "on" and run this
+                            relay1State = true //set relay1 state variable to on
+                            //store the voltage that comes from Esp and show it and change the background color of relay1 to green
+                            tempVoltage = responseJsonObject.getDouble("voltage")
+                            ma_tv_batteryVoltage.text = "ولتاژ باتری موتور: $tempVoltage ولت"
+                            ma_btn_relay1.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.colorAccent)
+                        }else if (myJsonObject.getString("state") == "off") {
+                            //current request of relay1 is "off" and run this
+                            relay1State = true //set relay1 state variable to on
+                            //store the voltage that comes from Esp and show it and change the background color of relay1 to green
+                            tempVoltage = responseJsonObject.getDouble("voltage")
+                            ma_tv_batteryVoltage.text = "ولتاژ باتری موتور: $tempVoltage ولت"
+                            ma_btn_relay1.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.red_color)
+                        }
+                    }
+                    "relay2" -> {
+                        if (myJsonObject.getString("state") == "on") {
+                            //current request of relay2 is "on" and run this
+                            relay2State = true //set relay2 state variable to on
+                            //store the voltage that comes from Esp and show it and change the background color of relay2 to green
+                            tempVoltage = responseJsonObject.getDouble("voltage")
+                            ma_tv_batteryVoltage.text = "ولتاژ باتری موتور: $tempVoltage ولت"
+                            ma_btn_relay2.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.colorAccent)
+                        }else if (myJsonObject.getString("state") == "off") {
+                            //current request of relay2 is "off" and run this
+                            relay2State = true //set relay2 state variable to on
+                            //store the voltage that comes from Esp and show it and change the background color of relay2 to green
+                            tempVoltage = responseJsonObject.getDouble("voltage")
+                            ma_tv_batteryVoltage.text = "ولتاژ باتری موتور: $tempVoltage ولت"
+                            ma_btn_relay2.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.red_color)
+                        }
+                    }
+                    "relay3" -> {
+                        if (myJsonObject.getString("state") == "on") {
+                            //current request of relay3 is "on" and run this
+                            relay3State = true //set relay3 state variable to on
+                            //store the voltage that comes from Esp and show it and change the background color of relay3 to green
+                            tempVoltage = responseJsonObject.getDouble("voltage")
+                            ma_tv_batteryVoltage.text = "ولتاژ باتری موتور: $tempVoltage ولت"
+                            ma_btn_relay3.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.colorAccent)
+                        }else if (myJsonObject.getString("state") == "off") {
+                            //current request of relay3 is "off" and run this
+                            relay3State = true //set relay3 state variable to on
+                            //store the voltage that comes from Esp and show it and change the background color of relay3 to green
+                            tempVoltage = responseJsonObject.getDouble("voltage")
+                            ma_tv_batteryVoltage.text = "ولتاژ باتری موتور: $tempVoltage ولت"
+                            ma_btn_relay3.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.red_color)
+                        }
+                    }
+                }
+            }
+        }
+        ma_tv_connectionState.text = getString(R.string.connection_state_connected) //change connection state textView
+        ma_tv_connectionState.setTextColor(ContextCompat.getColor(this@MainActivity, R.color.colorAccent)) //change connection state textView color
+    }
+    
+    private fun failResponseFromEsp(){
+       //change connection state textView color to red
+        if (myJsonObject.getString("relayType") == "switch") {
+            when(myJsonObject.getString("androidReq")){
+                "relay1" -> {
+                    relay1State = false
+                    ma_btn_relay1.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.red_color)
+                }
+                "relay2" -> {
+                    relay2State = false
+                    ma_btn_relay2.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.red_color)
+                }
+                "relay3" -> {
+                    relay3State = false
+                    ma_btn_relay3.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.red_color)
+                }
+            }
+        }
+        ma_tv_connectionState.text = getString(R.string.connection_state_problem) //change connection state textView
+        ma_tv_connectionState.setTextColor(ContextCompat.getColor(this@MainActivity, R.color.red_color))
+        showInfoDialog(
+            R.color.dark_red_color,
+            R.drawable.ic_fail_white_50dp,
+            getString(R.string.dialog_btn_save),
+            getString(R.string.fail_dialog_title),
+            getString(R.string.fail_dialog_message)
+        ) //show alert dialog for fail
+    }
+
     override fun onPause() {
         onPaused = true
         mSocket.disconnect()
@@ -330,13 +500,13 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         onPaused = false
-        ma_jsv_joystick.resetButtonPosition()
+        //ma_jsv_joystick.resetButtonPosition()
     }
 
     override fun onRestart() {
         super.onRestart()
         onPaused = false
-        ma_jsv_joystick.resetButtonPosition()
+        //ma_jsv_joystick.resetButtonPosition()
     }
 
 }

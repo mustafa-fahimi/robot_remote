@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:padding="30dp">
+
+    <com.rengwuxian.materialedittext.MaterialEditText
+        android:id="@+id/rsd_relay_name_et"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:ems="10"
+        android:gravity="right"
+        android:hint="@string/relay_new_name"
+        android:inputType="textPassword"
+        android:maxLength="20"
+        android:maxLines="1"
+        android:singleLine="true"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:met_baseColor="@color/colorAccent"
+        app:met_floatingLabel="highlight"
+        app:met_floatingLabelTextColor="@color/colorAccent"
+        app:met_floatingLabelTextSize="20sp"
+        app:met_primaryColor="@color/colorAccent"
+        app:met_textColor="@color/colorAccent"
+        app:met_textColorHint="@color/colorAccent" />
+
+    <com.varunest.sparkbutton.SparkButton
+        android:id="@+id/rsd_single_shot_btn"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="30dp"
+        app:layout_constraintEnd_toEndOf="@+id/rsd_relay_name_et"
+        app:layout_constraintTop_toBottomOf="@+id/rsd_relay_name_et"
+        app:sparkbutton_activeImage="@drawable/ic_check_active"
+        app:sparkbutton_iconSize="40dp"
+        app:sparkbutton_inActiveImage="@drawable/ic_check_inactive"
+        app:sparkbutton_primaryColor="@color/colorAccent"
+        app:sparkbutton_secondaryColor="@color/colorAccent" />
+
+    <TextView
+        android:id="@+id/rsd_single_shot_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/single_shot_type"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/rsd_single_shot_btn"
+        app:layout_constraintEnd_toStartOf="@+id/rsd_single_shot_btn"
+        app:layout_constraintHorizontal_bias="0.85"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/rsd_single_shot_btn" />
+
+    <com.varunest.sparkbutton.SparkButton
+        android:id="@+id/rsd_multi_shot_btn"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="15dp"
+        app:layout_constraintEnd_toEndOf="@+id/rsd_single_shot_btn"
+        app:layout_constraintStart_toStartOf="@+id/rsd_single_shot_btn"
+        app:layout_constraintTop_toBottomOf="@+id/rsd_single_shot_btn"
+        app:sparkbutton_activeImage="@drawable/ic_check_active"
+        app:sparkbutton_iconSize="40dp"
+        app:sparkbutton_inActiveImage="@drawable/ic_check_inactive"
+        app:sparkbutton_primaryColor="@color/colorAccent"
+        app:sparkbutton_secondaryColor="@color/colorAccent" />
+
+    <TextView
+        android:id="@+id/rsd_multi_shot_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/multi_shot_type"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/rsd_multi_shot_btn"
+        app:layout_constraintEnd_toEndOf="@+id/rsd_single_shot_tv"
+        app:layout_constraintStart_toStartOf="@+id/rsd_single_shot_tv"
+        app:layout_constraintTop_toTopOf="@+id/rsd_multi_shot_btn" />
+
+    <com.varunest.sparkbutton.SparkButton
+        android:id="@+id/rsd_switch_btn"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="15dp"
+        app:layout_constraintEnd_toEndOf="@+id/rsd_single_shot_btn"
+        app:layout_constraintStart_toStartOf="@+id/rsd_single_shot_btn"
+        app:layout_constraintTop_toBottomOf="@+id/rsd_multi_shot_btn"
+        app:sparkbutton_activeImage="@drawable/ic_check_active"
+        app:sparkbutton_iconSize="40dp"
+        app:sparkbutton_inActiveImage="@drawable/ic_check_inactive"
+        app:sparkbutton_primaryColor="@color/colorAccent"
+        app:sparkbutton_secondaryColor="@color/colorAccent" />
+
+    <TextView
+        android:id="@+id/rsd_switch_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/switch_type"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/rsd_switch_btn"
+        app:layout_constraintEnd_toEndOf="@+id/rsd_single_shot_tv"
+        app:layout_constraintStart_toStartOf="@+id/rsd_single_shot_tv"
+        app:layout_constraintTop_toTopOf="@+id/rsd_switch_btn" />
+
+    <com.ornach.nobobutton.NoboButton
+        android:id="@+id/rsd_save_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="15dp"
+        app:layout_constraintBottom_toBottomOf="@+id/rsd_cancel_btn"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/rsd_cancel_btn"
+        app:nb_backgroundColor="@color/colorAccent"
+        app:nb_borderColor="@color/white_color"
+        app:nb_borderWidth="2dp"
+        app:nb_focusColor="@color/grey_30"
+        app:nb_radius="10dp"
+        app:nb_text="@string/dialog_btn_save"
+        app:nb_textColor="@color/white_color"
+        app:nb_textSize="20sp" />
+
+    <com.ornach.nobobutton.NoboButton
+        android:id="@+id/rsd_cancel_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:padding="15dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.1"
+        app:layout_constraintStart_toEndOf="@+id/rsd_save_btn"
+        app:layout_constraintTop_toBottomOf="@+id/rsd_switch_btn"
+        app:nb_backgroundColor="@color/red_color"
+        app:nb_borderColor="@color/white_color"
+        app:nb_borderWidth="2dp"
+        app:nb_focusColor="@color/grey_30"
+        app:nb_radius="10dp"
+        app:nb_text="@string/dialog_btn_cancel"
+        app:nb_textColor="@color/white_color"
+        app:nb_textSize="20sp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

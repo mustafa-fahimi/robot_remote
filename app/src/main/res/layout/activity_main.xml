@@ -1,84 +1,123 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:custom="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/ma_root_cl"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/dark_blue"
+    android:background="@color/steel_blue"
     tools:context=".views.MainActivity">
 
-    <io.github.controlwear.virtual.joystick.android.JoystickView
-        android:id="@+id/ma_jsv_joystick"
-        android:layout_width="230dp"
-        android:layout_height="230dp"
-        android:background="@drawable/joystick_bg"
-        app:JV_autoReCenterButton="true"
-        app:JV_buttonImage="@drawable/joystick_roller"
+    <ImageView
+        android:id="@+id/ma_iv_left"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:contentDescription="@string/left_arrow"
+        android:src="@drawable/left_arrow"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/ma_iv_up"
+        app:layout_constraintHorizontal_bias="0.85"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/ma_iv_up"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:contentDescription="@string/up_arrow"
+        android:src="@drawable/up_arrow"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintBottom_toTopOf="@+id/ma_iv_down"
+        app:layout_constraintEnd_toStartOf="@+id/ma_iv_right"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/ma_iv_left"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/ma_iv_right"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:contentDescription="@string/right_arrow"
+        android:src="@drawable/right_arrow"
+        android:clickable="true"
+        android:focusable="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.85"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        custom:JV_borderWidth="0dp"
-        custom:JV_buttonSizeRatio="19%"
-        custom:JV_fixedCenter="false" />
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/ma_iv_up"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/ma_iv_down"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:contentDescription="@string/down_arrow"
+        android:src="@drawable/down_arrow"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/ma_iv_up"
+        app:layout_constraintStart_toStartOf="@+id/ma_iv_up"
+        app:layout_constraintTop_toBottomOf="@+id/ma_iv_up" />
 
     <com.ornach.nobobutton.NoboButton
-        android:id="@+id/ma_btn_gun1"
+        android:id="@+id/ma_btn_relay1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="12dp"
-        app:layout_constraintBottom_toTopOf="@+id/ma_btn_gun2"
+        app:layout_constraintBottom_toTopOf="@+id/ma_btn_relay2"
         app:layout_constraintEnd_toEndOf="@+id/ma_tv_connectionState"
         app:layout_constraintStart_toStartOf="@+id/ma_tv_connectionState"
         app:layout_constraintTop_toBottomOf="@+id/ma_tv_batteryVoltage"
         app:nb_backgroundColor="@color/dark_red_color"
         app:nb_borderColor="@color/white_color"
         app:nb_borderWidth="2dp"
-        app:nb_focusColor="@color/white_color"
-        app:nb_radius="25dp"
+        app:nb_focusColor="@color/colorAccent"
+        app:nb_radius="5dp"
         app:nb_text="@string/one_shot_gun"
         app:nb_textColor="@color/white_color"
-        app:nb_textSize="19sp" />
+        app:nb_textSize="18sp" />
 
     <com.ornach.nobobutton.NoboButton
-        android:id="@+id/ma_btn_gun2"
+        android:id="@+id/ma_btn_relay2"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:padding="12dp"
-        app:layout_constraintBottom_toTopOf="@+id/ma_btn_gun3"
-        app:layout_constraintEnd_toEndOf="@+id/ma_btn_gun1"
-        app:layout_constraintStart_toStartOf="@+id/ma_btn_gun1"
-        app:layout_constraintTop_toBottomOf="@+id/ma_btn_gun1"
+        app:layout_constraintBottom_toTopOf="@+id/ma_btn_relay3"
+        app:layout_constraintEnd_toEndOf="@+id/ma_btn_relay1"
+        app:layout_constraintStart_toStartOf="@+id/ma_btn_relay1"
+        app:layout_constraintTop_toBottomOf="@+id/ma_btn_relay1"
         app:nb_backgroundColor="@color/dark_red_color"
         app:nb_borderColor="@color/white_color"
         app:nb_borderWidth="2dp"
-        app:nb_focusColor="@color/white_color"
+        app:nb_focusColor="@color/dark_red_color"
         app:nb_radius="25dp"
         app:nb_text="@string/rapid_gun"
         app:nb_textColor="@color/white_color"
-        app:nb_textSize="19sp" />
+        app:nb_textSize="18sp" />
 
     <com.ornach.nobobutton.NoboButton
-        android:id="@+id/ma_btn_gun3"
+        android:id="@+id/ma_btn_relay3"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:padding="12dp"
         app:layout_constraintBottom_toTopOf="@+id/ma_tv_connectionState"
-        app:layout_constraintEnd_toEndOf="@+id/ma_btn_gun1"
+        app:layout_constraintEnd_toEndOf="@+id/ma_btn_relay1"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="@+id/ma_btn_gun1"
-        app:layout_constraintTop_toBottomOf="@+id/ma_btn_gun2"
+        app:layout_constraintStart_toStartOf="@+id/ma_btn_relay1"
+        app:layout_constraintTop_toBottomOf="@+id/ma_btn_relay2"
         app:nb_backgroundColor="@color/dark_red_color"
         app:nb_borderColor="@color/white_color"
         app:nb_borderWidth="2dp"
-        app:nb_focusColor="@color/white_color"
+        app:nb_focusColor="@color/dark_red_color"
         app:nb_radius="25dp"
         app:nb_text="@string/toggle_gun"
         app:nb_textColor="@color/white_color"
-        app:nb_textSize="19sp" />
+        app:nb_textSize="18sp" />
 
     <TextView
         android:id="@+id/ma_tv_connectionState"
@@ -88,11 +127,11 @@
         android:textColor="@color/white_color"
         android:textSize="19sp"
         android:textStyle="bold"
-        app:layout_constraintHorizontal_bias="0.07"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.07"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/ma_btn_gun3" />
+        app:layout_constraintTop_toBottomOf="@+id/ma_btn_relay3" />
 
     <TextView
         android:id="@+id/ma_tv_batteryVoltage"
@@ -103,7 +142,7 @@
         android:textColor="@color/white_color"
         android:textSize="19sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/ma_btn_gun1"
+        app:layout_constraintBottom_toTopOf="@+id/ma_btn_relay1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.07"
         app:layout_constraintStart_toStartOf="parent"

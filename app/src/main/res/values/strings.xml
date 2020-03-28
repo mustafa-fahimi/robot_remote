@@ -31,7 +31,11 @@
     <string name="about_us">درباره ما</string>
     <string name="version_number">نسخه 1.0</string>
     <string name="change_wifi_name">تغییر نام وای فای</string>
-    <string name="relay1_type">نوع رله اول</string>
-    <string name="relay2_type">نوع رله دوم</string>
-    <string name="relay3_type">نوع رله سوم</string>
+    <string name="relay1_settings">تنظیمات رله اول</string>
+    <string name="relay2_settings">تنظیمات رله دوم</string>
+    <string name="relay3_settings">تنظیمات رله سوم</string>
+    <string name="relay_new_name">نام جدید رله</string>
+    <string name="single_shot_type">حالت تک تیر</string>
+    <string name="multi_shot_type">حالت رگبار</string>
+    <string name="switch_type">حالت سوییچ</string>
 </resources>

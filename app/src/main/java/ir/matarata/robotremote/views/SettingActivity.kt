@@ -15,7 +15,7 @@ import dmax.dialog.SpotsDialog
 import ir.matarata.robotremote.R
 import ir.matarata.robotremote.utils.Tools
 import kotlinx.android.synthetic.main.activity_setting.*
-import kotlinx.android.synthetic.main.relay1_dialog.*
+import kotlinx.android.synthetic.main.relay_setting_dialog.*
 import kotlinx.android.synthetic.main.wifi_name_dialog.*
 import kotlinx.android.synthetic.main.wifi_pass_dialog.*
 import kotlinx.coroutines.*
@@ -56,8 +56,14 @@ class SettingActivity : AppCompatActivity() {
         sa_change_wifi_pass_tv.setOnClickListener {
             showChangeWifiPassDialog()
         }
-        sa_relay1_type_tv.setOnClickListener {
-            showRelay1TypeDialog()
+        sa_relay1_settings_tv.setOnClickListener {
+            showRelaySettingsDialog(1)
+        }
+        sa_relay2_settings_tv.setOnClickListener {
+            showRelaySettingsDialog(2)
+        }
+        sa_relay3_settings_tv.setOnClickListener {
+            showRelaySettingsDialog(3)
         }
 
     }
@@ -200,7 +206,7 @@ class SettingActivity : AppCompatActivity() {
         customDialog.setCancelable(false)
         customLayoutParam = WindowManager.LayoutParams()
         customLayoutParam.copyFrom(customDialog.window!!.attributes)
-        customLayoutParam.width = WindowManager.LayoutParams.WRAP_CONTENT
+        customLayoutParam.width = WindowManager.LayoutParams.MATCH_PARENT
         customLayoutParam.height = WindowManager.LayoutParams.WRAP_CONTENT
         customDialog.wpd_btn_submit.setOnClickListener {
             when {
@@ -241,7 +247,7 @@ class SettingActivity : AppCompatActivity() {
         customDialog.setCancelable(false)
         customLayoutParam = WindowManager.LayoutParams()
         customLayoutParam.copyFrom(customDialog.window!!.attributes)
-        customLayoutParam.width = WindowManager.LayoutParams.WRAP_CONTENT
+        customLayoutParam.width = WindowManager.LayoutParams.MATCH_PARENT
         customLayoutParam.height = WindowManager.LayoutParams.WRAP_CONTENT
         customDialog.wnd_btn_submit.setOnClickListener {
             when {
@@ -271,56 +277,70 @@ class SettingActivity : AppCompatActivity() {
         customDialog.window!!.attributes = customLayoutParam
     }
 
-    private fun showRelay1TypeDialog() {
+    private fun showRelaySettingsDialog(whichRelay: Int) {
         customDialog = Dialog(this)
         customDialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
-        customDialog.setContentView(R.layout.relay1_dialog)
+        customDialog.setContentView(R.layout.relay_setting_dialog)
         customDialog.setCancelable(false)
         customLayoutParam = WindowManager.LayoutParams()
         customLayoutParam.copyFrom(customDialog.window!!.attributes)
-        customLayoutParam.width = WindowManager.LayoutParams.WRAP_CONTENT
+        customLayoutParam.width = WindowManager.LayoutParams.MATCH_PARENT
         customLayoutParam.height = WindowManager.LayoutParams.WRAP_CONTENT
-        customDialog.r1d_single_shot_btn.setEventListener(object : SparkEventListener {
+        customDialog.rsd_single_shot_btn.setEventListener(object : SparkEventListener {
             override fun onEventAnimationEnd(button: ImageView?, buttonState: Boolean) {}
             override fun onEventAnimationStart(button: ImageView?, buttonState: Boolean) {}
             override fun onEvent(button: ImageView?, buttonState: Boolean) {
                 if (buttonState){
-                    customDialog.r1d_multi_shot_btn.isChecked = false
-                    customDialog.r1d_switch_btn.isChecked = false
+                    customDialog.rsd_multi_shot_btn.isChecked = false
+                    customDialog.rsd_switch_btn.isChecked = false
                 }else{
-                    customDialog.r1d_multi_shot_btn.playAnimation()
-                    customDialog.r1d_multi_shot_btn.isChecked = true
+                    customDialog.rsd_multi_shot_btn.playAnimation()
+                    customDialog.rsd_multi_shot_btn.isChecked = true
                 }
             }
         })
-        customDialog.r1d_multi_shot_btn.setEventListener(object : SparkEventListener {
+        customDialog.rsd_multi_shot_btn.setEventListener(object : SparkEventListener {
             override fun onEventAnimationEnd(button: ImageView?, buttonState: Boolean) {}
             override fun onEventAnimationStart(button: ImageView?, buttonState: Boolean) {}
             override fun onEvent(button: ImageView?, buttonState: Boolean) {
                 if (buttonState){
-                    customDialog.r1d_single_shot_btn.isChecked = false
-                    customDialog.r1d_switch_btn.isChecked = false
+                    customDialog.rsd_single_shot_btn.isChecked = false
+                    customDialog.rsd_switch_btn.isChecked = false
                 }else{
-                    customDialog.r1d_single_shot_btn.playAnimation()
-                    customDialog.r1d_single_shot_btn.isChecked = true
+                    customDialog.rsd_single_shot_btn.playAnimation()
+                    customDialog.rsd_single_shot_btn.isChecked = true
                 }
             }
         })
-        customDialog.r1d_switch_btn.setEventListener(object : SparkEventListener {
+        customDialog.rsd_switch_btn.setEventListener(object : SparkEventListener {
             override fun onEventAnimationEnd(button: ImageView?, buttonState: Boolean) {}
             override fun onEventAnimationStart(button: ImageView?, buttonState: Boolean) {}
             override fun onEvent(button: ImageView?, buttonState: Boolean) {
                 if (buttonState){
-                    customDialog.r1d_single_shot_btn.isChecked = false
-                    customDialog.r1d_multi_shot_btn.isChecked = false
+                    customDialog.rsd_single_shot_btn.isChecked = false
+                    customDialog.rsd_multi_shot_btn.isChecked = false
                 }else{
-                    customDialog.r1d_single_shot_btn.playAnimation()
-                    customDialog.r1d_single_shot_btn.isChecked = true
+                    customDialog.rsd_single_shot_btn.playAnimation()
+                    customDialog.rsd_single_shot_btn.isChecked = true
                 }
             }
         })
-        customDialog.r1d_save_btn.setOnClickListener {  }
-        customDialog.r1d_cancel_btn.setOnClickListener {
+        customDialog.rsd_save_btn.setOnClickListener {
+            when {
+                //check password editText is not empty and both are equal and bigger than 8 character
+                customDialog.rsd_relay_name_et.text.isNullOrEmpty() -> {
+                    customDialog.rsd_relay_name_et.error = "نباید خالی باشد"
+                    return@setOnClickListener
+                }
+                customDialog.rsd_relay_name_et.text.toString().length < 3 -> {
+                    customDialog.rsd_relay_name_et.error = "حداقل 3 کاراکتر باشد"
+                    return@setOnClickListener
+                }
+            }
+            progressDialog() //show progress dialog
+            //TODO: add relay name and state based on whichRelay variable to local database
+        }
+        customDialog.rsd_cancel_btn.setOnClickListener {
             customDialog.dismiss()
         }
         customDialog.show()

@@ -106,7 +106,7 @@
                 android:textSize="13sp" />
 
             <TextView
-                android:id="@+id/sa_relay1_type_tv"
+                android:id="@+id/sa_relay1_settings_tv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:clickable="true"
@@ -115,7 +115,7 @@
                 android:paddingTop="8dp"
                 android:paddingRight="15dp"
                 android:paddingBottom="8dp"
-                android:text="@string/relay1_type"
+                android:text="@string/relay1_settings"
                 android:textColor="@android:color/black"
                 android:textSize="18sp" />
 
@@ -129,7 +129,7 @@
                 android:background="@color/grey_30" />
 
             <TextView
-                android:id="@+id/sa_relay2_type_tv"
+                android:id="@+id/sa_relay2_settings_tv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:clickable="true"
@@ -138,7 +138,7 @@
                 android:paddingTop="8dp"
                 android:paddingRight="15dp"
                 android:paddingBottom="8dp"
-                android:text="@string/relay2_type"
+                android:text="@string/relay2_settings"
                 android:textColor="@android:color/black"
                 android:textSize="18sp" />
 
@@ -152,7 +152,7 @@
                 android:background="@color/grey_30" />
 
             <TextView
-                android:id="@+id/sa_relay3_type_tv"
+                android:id="@+id/sa_relay3_settings_tv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:clickable="true"
@@ -161,7 +161,7 @@
                 android:paddingTop="8dp"
                 android:paddingRight="15dp"
                 android:paddingBottom="8dp"
-                android:text="@string/relay3_type"
+                android:text="@string/relay3_settings"
                 android:textColor="@android:color/black"
                 android:textSize="18sp" />
 
