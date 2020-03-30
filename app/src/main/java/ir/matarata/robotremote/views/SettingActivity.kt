@@ -8,12 +8,17 @@ import android.view.Window
 import android.view.WindowManager
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import com.neovisionaries.ws.client.*
+import com.ornach.nobobutton.NoboButton
 import com.varunest.sparkbutton.SparkEventListener
 import com.yarolegovich.lovelydialog.LovelyInfoDialog
 import dmax.dialog.SpotsDialog
 import ir.matarata.robotremote.R
+import ir.matarata.robotremote.models.RelaysEntity
 import ir.matarata.robotremote.utils.Tools
+import ir.matarata.robotremote.viewmodels.RelaysVM
 import kotlinx.android.synthetic.main.activity_setting.*
 import kotlinx.android.synthetic.main.relay_setting_dialog.*
 import kotlinx.android.synthetic.main.wifi_name_dialog.*
@@ -34,6 +39,9 @@ class SettingActivity : AppCompatActivity() {
     private var mDialog: Dialog? = null //variable to store alert dialog
     private lateinit var customDialog: Dialog
     private lateinit var customLayoutParam: WindowManager.LayoutParams
+    private var tempRelayType = "None"
+    private lateinit var relaysVM: RelaysVM
+    private var relaysData: List<RelaysEntity>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,6 +58,39 @@ class SettingActivity : AppCompatActivity() {
                 getString(R.string.fail_dialog_message)
             ) //show alert dialog for fail
         }
+        relaysVM = ViewModelProvider(this).get(RelaysVM::class.java)
+        relaysVM.allRelaysData.observe(this, Observer { data ->
+            data?.let {
+                if (!data.isNullOrEmpty()) {
+                    if (relaysData.isNullOrEmpty()) {
+                        relaysData = data
+                    } else {
+                        if (data != relaysData) {
+                            progressDialog.dismiss()
+                            customDialog.dismiss()
+                            showInfoDialog(
+                                R.color.colorAccent,
+                                R.drawable.ic_done_white_50dp,
+                                getString(R.string.dialog_btn_confirm),
+                                getString(R.string.success_dialog_title),
+                                getString(R.string.success_dialog_message2)
+                            ) //show alert dialog for success
+                        } else {
+                            relaysData = data
+                            progressDialog.dismiss()
+                            showInfoDialog(
+                                R.color.dark_red_color,
+                                R.drawable.ic_fail_white_50dp,
+                                getString(R.string.dialog_btn_confirm),
+                                getString(R.string.fail_dialog_title),
+                                getString(R.string.fail_dialog_message)
+                            ) //show alert dialog for fail
+                        }
+                    }
+                }
+            }
+        })
+
         sa_change_wifi_name_tv.setOnClickListener {
             showChangeWifiNameDialog()
         }
@@ -278,6 +319,7 @@ class SettingActivity : AppCompatActivity() {
     }
 
     private fun showRelaySettingsDialog(whichRelay: Int) {
+        tempRelayType = "None"
         customDialog = Dialog(this)
         customDialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         customDialog.setContentView(R.layout.relay_setting_dialog)
@@ -286,14 +328,17 @@ class SettingActivity : AppCompatActivity() {
         customLayoutParam.copyFrom(customDialog.window!!.attributes)
         customLayoutParam.width = WindowManager.LayoutParams.MATCH_PARENT
         customLayoutParam.height = WindowManager.LayoutParams.WRAP_CONTENT
+        customDialog.rsd_root_cl.requestFocus()
         customDialog.rsd_single_shot_btn.setEventListener(object : SparkEventListener {
             override fun onEventAnimationEnd(button: ImageView?, buttonState: Boolean) {}
             override fun onEventAnimationStart(button: ImageView?, buttonState: Boolean) {}
             override fun onEvent(button: ImageView?, buttonState: Boolean) {
-                if (buttonState){
+                if (buttonState) {
+                    tempRelayType = "single"
                     customDialog.rsd_multi_shot_btn.isChecked = false
                     customDialog.rsd_switch_btn.isChecked = false
-                }else{
+                } else {
+                    tempRelayType = "None"
                     customDialog.rsd_multi_shot_btn.playAnimation()
                     customDialog.rsd_multi_shot_btn.isChecked = true
                 }
@@ -303,10 +348,12 @@ class SettingActivity : AppCompatActivity() {
             override fun onEventAnimationEnd(button: ImageView?, buttonState: Boolean) {}
             override fun onEventAnimationStart(button: ImageView?, buttonState: Boolean) {}
             override fun onEvent(button: ImageView?, buttonState: Boolean) {
-                if (buttonState){
+                if (buttonState) {
+                    tempRelayType = "multi"
                     customDialog.rsd_single_shot_btn.isChecked = false
                     customDialog.rsd_switch_btn.isChecked = false
-                }else{
+                } else {
+                    tempRelayType = "None"
                     customDialog.rsd_single_shot_btn.playAnimation()
                     customDialog.rsd_single_shot_btn.isChecked = true
                 }
@@ -316,10 +363,12 @@ class SettingActivity : AppCompatActivity() {
             override fun onEventAnimationEnd(button: ImageView?, buttonState: Boolean) {}
             override fun onEventAnimationStart(button: ImageView?, buttonState: Boolean) {}
             override fun onEvent(button: ImageView?, buttonState: Boolean) {
-                if (buttonState){
+                if (buttonState) {
+                    tempRelayType = "switch"
                     customDialog.rsd_single_shot_btn.isChecked = false
                     customDialog.rsd_multi_shot_btn.isChecked = false
-                }else{
+                } else {
+                    tempRelayType = "None"
                     customDialog.rsd_single_shot_btn.playAnimation()
                     customDialog.rsd_single_shot_btn.isChecked = true
                 }
@@ -332,13 +381,16 @@ class SettingActivity : AppCompatActivity() {
                     customDialog.rsd_relay_name_et.error = "نباید خالی باشد"
                     return@setOnClickListener
                 }
-                customDialog.rsd_relay_name_et.text.toString().length < 3 -> {
-                    customDialog.rsd_relay_name_et.error = "حداقل 3 کاراکتر باشد"
+                customDialog.rsd_relay_name_et.text.toString().length < 5 -> {
+                    customDialog.rsd_relay_name_et.error = "حداقل 5 کاراکتر باشد"
                     return@setOnClickListener
                 }
             }
+            if (tempRelayType == "None")
+                return@setOnClickListener
             progressDialog() //show progress dialog
-            //TODO: add relay name and state based on whichRelay variable to local database
+            val tempUpdateRelays = RelaysEntity(whichRelay, customDialog.rsd_relay_name_et.text.toString(), tempRelayType)
+            relaysVM.updateRelay(tempUpdateRelays)
         }
         customDialog.rsd_cancel_btn.setOnClickListener {
             customDialog.dismiss()

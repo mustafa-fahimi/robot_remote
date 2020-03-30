@@ -21,6 +21,7 @@
     <string name="dialog_btn_cancel">لغو</string>
     <string name="success_dialog_title">ثبت با موفقیت</string>
     <string name="success_dialog_message">اطلاعات جدید با موفقیت در ریموت ثبت گردید.</string>
+    <string name="success_dialog_message2">تنظیمات جدید رله با موفقیت ذخیره شد.</string>
     <string name="fail_dialog_title">خطا در ثبت</string>
     <string name="fail_dialog_message">خطایی رخ داده است. لطفا مجددا تلاش نمایید.</string>
     <string name="progress_dialog_title">لطفا منتظر بمانید…</string>
@@ -28,7 +29,7 @@
     <string name="relays_settings">تنظیمات رله ها</string>
     <string name="change_wifi_password">تغییر رمز عبور وای فای</string>
     <string name="share_app">اشتراک برنامه</string>
-    <string name="about_us">درباره ما</string>
+    <string name="about_us">درباره سازنده</string>
     <string name="version_number">نسخه 1.0</string>
     <string name="change_wifi_name">تغییر نام وای فای</string>
     <string name="relay1_settings">تنظیمات رله اول</string>

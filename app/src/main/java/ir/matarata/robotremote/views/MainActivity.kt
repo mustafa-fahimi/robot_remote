@@ -3,6 +3,7 @@ package ir.matarata.robotremote.views
 import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.MotionEvent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -51,10 +52,12 @@ class MainActivity : AppCompatActivity() {
         relaysVM = ViewModelProvider(this).get(RelaysVM::class.java)
         relaysVM.allRelaysData.observe(this, Observer { data ->
             data?.let {
-                relaysData = data
-                ma_btn_relay1.text = relaysData[0].relayTitle
-                ma_btn_relay2.text = relaysData[1].relayTitle
-                ma_btn_relay3.text = relaysData[2].relayTitle
+                if(!data.isNullOrEmpty()){
+                    relaysData = data
+                    ma_btn_relay1.text = relaysData[0].relayTitle
+                    ma_btn_relay2.text = relaysData[1].relayTitle
+                    ma_btn_relay3.text = relaysData[2].relayTitle
+                }
             }
         })
 

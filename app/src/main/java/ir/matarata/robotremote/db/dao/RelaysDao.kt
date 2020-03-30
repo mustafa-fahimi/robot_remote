@@ -1,5 +1,6 @@
 package ir.matarata.robotremote.db.dao
 
+import android.support.v4.app.INotificationSideChannel
 import androidx.lifecycle.LiveData
 import androidx.room.*
 import ir.matarata.robotremote.models.RelaysEntity
@@ -10,8 +11,8 @@ interface RelaysDao {
     fun getRelays(): LiveData<List<RelaysEntity>>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertRelay(relaysEntity: RelaysEntity)
+    suspend fun insertRelay(relaysEntity: List<RelaysEntity>)
 
-    @Query("UPDATE relaysTable SET relayTitle = :newRelayTitle AND relayType = :newRelayType WHERE relayId = :relayID")
-    suspend fun updateRelay(relayID: Int, newRelayTitle: String, newRelayType: String)
+    @Update(entity = RelaysEntity::class, onConflict = OnConflictStrategy.IGNORE)
+    suspend fun updateRelay(relaysEntity: RelaysEntity)
 }

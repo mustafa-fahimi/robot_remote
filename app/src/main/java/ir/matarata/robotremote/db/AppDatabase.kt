@@ -48,12 +48,8 @@ abstract class AppDatabase : RoomDatabase(){
         }
         //This coroutine function insert data to db
         suspend fun populateDatabase(relaysDao: RelaysDao) {
-            val tempData = RelaysEntity(1, "تفنگ تک تیر", "single")
+            val tempData = listOf(RelaysEntity(1, "تفنگ تک تیر", "single"), RelaysEntity(2, "تفنگ رگبار", "multi"), RelaysEntity(3, "تفنگ ثابت", "switch"))
             relaysDao.insertRelay(tempData)
-            val tempData2 = RelaysEntity(2, "تفنگ رگبار", "multi")
-            relaysDao.insertRelay(tempData2)
-            val tempData3 = RelaysEntity(3, "تفنگ ثابت", "switch")
-            relaysDao.insertRelay(tempData3)
         }
     }
 

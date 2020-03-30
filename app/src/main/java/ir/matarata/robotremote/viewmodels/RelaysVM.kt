@@ -20,11 +20,7 @@ class RelaysVM(application: Application) : AndroidViewModel(application){
         allRelaysData = relaysRepository.allRelaysData
     }
 
-    fun insertRelay(relaysEntity: RelaysEntity) = viewModelScope.launch {
-        relaysRepository.insertRelay(relaysEntity)
-    }
-
-    fun updateRelay(relayID: Int, newRelayTitle: String, newRelayType: String) = viewModelScope.launch {
-        relaysRepository.updateRelay(relayID, newRelayTitle, newRelayType)
+    fun updateRelay(relaysEntity: RelaysEntity) = viewModelScope.launch {
+        relaysRepository.updateRelay(relaysEntity)
     }
 }
