@@ -237,36 +237,7 @@ class MainActivity : AppCompatActivity() {
                 responseJsonObject = JSONObject(res) //create a json object from string response of Esp
                 if (responseJsonObject.getString("espResult") == "done") {
                     //response from Esp is "done"
-                    ma_tv_connectionState.text = getString(R.string.connection_state_connected) //change connection state textView
-                    ma_tv_connectionState.setTextColor(ContextCompat.getColor(this@MainActivity, R.color.colorAccent)) //change connection state textView color
-                    when (myJsonObject.getString("androidReq")) {
-                        "relay1" -> {
-                            //runs when current request was relay1
-                            //store the voltage that comes from Esp and show it
-                            tempVoltage = responseJsonObject.getDouble("voltage")
-                            ma_tv_batteryVoltage.text = "ولتاژ باتری موتور: $tempVoltage ولت"
-                        }
-                        "relay2" -> {
-                            //runs when current request was relay2
-                            //store the voltage that comes from Esp and show it
-                            tempVoltage = responseJsonObject.getDouble("voltage")
-                            ma_tv_batteryVoltage.text = "ولتاژ باتری موتور: $tempVoltage ولت"
-                        }
-                        "relay3" -> {
-                            //runs when current request was relay3
-                            if (myJsonObject.getString("state") == "on") {
-                                //current request of relay3 is "on" and run this
-                                relay3State = true //set relay3 state variable to on
-                                //store the voltage that comes from Esp and show it and change the background color of relay3 to green
-                                tempVoltage = responseJsonObject.getDouble("voltage")
-                                ma_tv_batteryVoltage.text = "ولتاژ باتری موتور: $tempVoltage ولت"
-                                ma_btn_relay3.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.colorAccent)
-                            } else if (myJsonObject.getString("state") == "off") {
-                                relay3State = false //set relay3 state variable to on
-                                ma_btn_relay3.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.red_color) //change the background color of relay3 to red
-                            }
-                        }
-                    }
+                    successResponseFromEsp()
                 } else if (responseJsonObject.getString("espResult") == "fail") {
                     //response from Esp is "fail"
                     failResponseFromEsp()
@@ -370,7 +341,7 @@ class MainActivity : AppCompatActivity() {
             when (relayType) {
                 "single" -> {
                     //change the background color of relay to red
-                    ma_btn_relay1.backgroundColor = ContextCompat.getColor(this, R.color.red_color)
+                    relayRelatedBtn.backgroundColor = ContextCompat.getColor(this, R.color.red_color)
                 }
                 "multi" -> {
                     //change the background color of relay to green
@@ -411,7 +382,7 @@ class MainActivity : AppCompatActivity() {
                             ma_btn_relay1.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.colorAccent)
                         }else if (myJsonObject.getString("state") == "off") {
                             //current request of relay1 is "off" and run this
-                            relay1State = true //set relay1 state variable to on
+                            relay1State = false //set relay1 state variable to off
                             //store the voltage that comes from Esp and show it and change the background color of relay1 to green
                             tempVoltage = responseJsonObject.getDouble("voltage")
                             ma_tv_batteryVoltage.text = "ولتاژ باتری موتور: $tempVoltage ولت"
@@ -428,7 +399,7 @@ class MainActivity : AppCompatActivity() {
                             ma_btn_relay2.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.colorAccent)
                         }else if (myJsonObject.getString("state") == "off") {
                             //current request of relay2 is "off" and run this
-                            relay2State = true //set relay2 state variable to on
+                            relay2State = false //set relay2 state variable to off
                             //store the voltage that comes from Esp and show it and change the background color of relay2 to green
                             tempVoltage = responseJsonObject.getDouble("voltage")
                             ma_tv_batteryVoltage.text = "ولتاژ باتری موتور: $tempVoltage ولت"
@@ -445,7 +416,7 @@ class MainActivity : AppCompatActivity() {
                             ma_btn_relay3.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.colorAccent)
                         }else if (myJsonObject.getString("state") == "off") {
                             //current request of relay3 is "off" and run this
-                            relay3State = true //set relay3 state variable to on
+                            relay3State = false //set relay3 state variable to off
                             //store the voltage that comes from Esp and show it and change the background color of relay3 to green
                             tempVoltage = responseJsonObject.getDouble("voltage")
                             ma_tv_batteryVoltage.text = "ولتاژ باتری موتور: $tempVoltage ولت"

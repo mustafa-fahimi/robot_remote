@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import ir.matarata.robotremote.db.AppDatabase
 import ir.matarata.robotremote.models.RelaysEntity
 import ir.matarata.robotremote.repositories.RelaysRepository
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class RelaysVM(application: Application) : AndroidViewModel(application){
@@ -21,6 +22,7 @@ class RelaysVM(application: Application) : AndroidViewModel(application){
     }
 
     fun updateRelay(relaysEntity: RelaysEntity) = viewModelScope.launch {
+        delay(1500)
         relaysRepository.updateRelay(relaysEntity)
     }
 }

@@ -18,7 +18,7 @@
         android:ems="10"
         android:gravity="right"
         android:hint="@string/relay_new_name"
-        android:inputType="textPassword"
+        android:inputType="text"
         android:maxLength="14"
         android:maxLines="1"
         android:singleLine="true"

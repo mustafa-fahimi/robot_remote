@@ -89,7 +89,7 @@
         app:nb_backgroundColor="@color/red_color"
         app:nb_borderColor="@color/white_color"
         app:nb_borderWidth="2dp"
-        app:nb_focusColor="@color/colorAccent"
+        app:nb_focusColor="@color/white_color"
         app:nb_radius="5dp"
         app:nb_text="@string/one_shot_gun"
         app:nb_textColor="@color/white_color"
