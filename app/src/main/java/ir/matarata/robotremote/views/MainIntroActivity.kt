@@ -1,6 +1,10 @@
 package ir.matarata.robotremote.views
 
+import android.content.Context
+import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
+import android.util.Log
 import androidx.annotation.Nullable
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -8,7 +12,7 @@ import com.github.paolorotolo.appintro.AppIntro
 import com.github.paolorotolo.appintro.AppIntroFragment
 import com.github.paolorotolo.appintro.model.SliderPage
 import ir.matarata.robotremote.R
-
+import ir.matarata.robotremote.utils.Tools
 
 class MainIntroActivity : AppIntro() {
 
@@ -16,29 +20,44 @@ class MainIntroActivity : AppIntro() {
     private val sliderPage2 = SliderPage()
     private val sliderPage3 = SliderPage()
     private val sliderPage4 = SliderPage()
+    private lateinit var sharedPref: SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        sliderPage1.title = getString(R.string.into1_title)
-        sliderPage1.description = getString(R.string.intro1_description)
-        sliderPage1.imageDrawable = R.drawable.app_description_intro
-        sliderPage1.bgColor = ContextCompat.getColor(this, R.color.green_intro)
+        sharedPref = this.getPreferences(Context.MODE_PRIVATE)
+        val sawIntroActivity = sharedPref.getBoolean(getString(R.string.saw_intro_key), false)
+        if(sawIntroActivity){
+            startActivity(Intent(this, MainActivity::class.java))
+        }
 
-        sliderPage2.title = getString(R.string.into2_title)
-        sliderPage2.description = getString(R.string.intro2_description)
-        sliderPage2.imageDrawable = R.drawable.board_description_intro
-        sliderPage2.bgColor = ContextCompat.getColor(this, R.color.teal_intro)
+        with(sliderPage1){
+            title = getString(R.string.into1_title)
+            description = getString(R.string.intro1_description)
+            imageDrawable = R.drawable.app_description_intro
+            bgColor = ContextCompat.getColor(applicationContext, R.color.green_intro)
+        }
 
-        sliderPage3.title = getString(R.string.into3_title)
-        sliderPage3.description = getString(R.string.intro3_description)
-        sliderPage3.imageDrawable = R.drawable.board_purchase_intro
-        sliderPage3.bgColor = ContextCompat.getColor(this, R.color.light_blue_intro)
+        with(sliderPage2){
+            title = getString(R.string.into2_title)
+            description = getString(R.string.intro2_description)
+            imageDrawable = R.drawable.board_description_intro
+            bgColor = ContextCompat.getColor(applicationContext, R.color.teal_intro)
+        }
 
-        sliderPage4.title = getString(R.string.into4_title)
-        sliderPage4.description = getString(R.string.intro4_description)
-        sliderPage4.imageDrawable = R.drawable.more_description_intro
-        sliderPage4.bgColor = ContextCompat.getColor(this, R.color.dark_blue_intro)
+        with(sliderPage3){
+            title = getString(R.string.into3_title)
+            description = getString(R.string.intro3_description)
+            imageDrawable = R.drawable.board_purchase_intro
+            bgColor = ContextCompat.getColor(applicationContext, R.color.light_blue_intro)
+        }
+
+        with(sliderPage4){
+            title = getString(R.string.into4_title)
+            description = getString(R.string.intro4_description)
+            imageDrawable = R.drawable.more_description_intro
+            bgColor = ContextCompat.getColor(applicationContext, R.color.dark_blue_intro)
+        }
 
         addSlide(AppIntroFragment.newInstance(sliderPage1))
         addSlide(AppIntroFragment.newInstance(sliderPage2))
@@ -51,12 +70,30 @@ class MainIntroActivity : AppIntro() {
 
     override fun onDonePressed(currentFragment: Fragment?) {
         super.onDonePressed(currentFragment)
-        // Do something when users tap on Done button.
+        with (sharedPref.edit()) {
+            putBoolean(getString(R.string.saw_intro_key), true)
+            commit()
+        }
+        startActivity(Intent(this, MainActivity::class.java))
+        finish()
     }
 
-    override fun onSlideChanged(@Nullable oldFragment: Fragment?, @Nullable newFragment: Fragment?) {
+    override fun onSlideChanged(oldFragment: Fragment?, newFragment: Fragment?) {
         super.onSlideChanged(oldFragment, newFragment)
-        // Do something when the slide changes.
+        when(newFragment?.tag.toString()){
+            "android:switcher:2131231086:0" -> {
+                Tools.setSystemBarColor(this, R.color.green_intro) //change the color of system bar
+            }
+            "android:switcher:2131231086:1" -> {
+                Tools.setSystemBarColor(this, R.color.teal_intro) //change the color of system bar
+            }
+            "android:switcher:2131231086:2" -> {
+                Tools.setSystemBarColor(this, R.color.light_blue_intro) //change the color of system bar
+            }
+            "android:switcher:2131231086:3" -> {
+                Tools.setSystemBarColor(this, R.color.dark_blue_intro) //change the color of system bar
+            }
+        }
     }
 
 }
