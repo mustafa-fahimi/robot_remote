@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.Window
 import android.view.WindowManager
 import android.widget.ImageView
@@ -24,6 +25,7 @@ import kotlinx.android.synthetic.main.relay_setting_dialog.*
 import kotlinx.android.synthetic.main.wifi_name_dialog.*
 import kotlinx.android.synthetic.main.wifi_pass_dialog.*
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collect
 import org.json.JSONObject
 
 
@@ -41,7 +43,6 @@ class SettingActivity : AppCompatActivity() {
     private lateinit var customLayoutParam: WindowManager.LayoutParams
     private var tempRelayType = "None"
     private lateinit var relaysVM: RelaysVM
-    private var relaysData: List<RelaysEntity>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,37 +60,6 @@ class SettingActivity : AppCompatActivity() {
             ) //show alert dialog for fail
         }
         relaysVM = ViewModelProvider(this).get(RelaysVM::class.java)
-        relaysVM.allRelaysData.observe(this, Observer { data ->
-            data?.let {
-                if (!data.isNullOrEmpty()) {
-                    if (relaysData.isNullOrEmpty()) {
-                        relaysData = data
-                    } else {
-                        if (data != relaysData) {
-                            progressDialog.dismiss()
-                            customDialog.dismiss()
-                            showInfoDialog(
-                                R.color.colorAccent,
-                                R.drawable.ic_done_white_50dp,
-                                getString(R.string.dialog_btn_confirm),
-                                getString(R.string.success_dialog_title),
-                                getString(R.string.success_dialog_message2)
-                            ) //show alert dialog for success
-                        } else {
-                            relaysData = data
-                            progressDialog.dismiss()
-                            showInfoDialog(
-                                R.color.dark_red_color,
-                                R.drawable.ic_fail_white_50dp,
-                                getString(R.string.dialog_btn_confirm),
-                                getString(R.string.fail_dialog_title),
-                                getString(R.string.fail_dialog_message)
-                            ) //show alert dialog for fail
-                        }
-                    }
-                }
-            }
-        })
 
         sa_change_wifi_name_tv.setOnClickListener {
             showChangeWifiNameDialog()
@@ -390,7 +360,30 @@ class SettingActivity : AppCompatActivity() {
                 return@setOnClickListener
             progressDialog() //show progress dialog
             val tempUpdateRelays = RelaysEntity(whichRelay, customDialog.rsd_relay_name_et.text.toString(), tempRelayType)
-            relaysVM.updateRelay(tempUpdateRelays)
+            CoroutineScope(Dispatchers.IO + handler).launch {
+                relaysVM.updateRelay(tempUpdateRelays).collect {
+                    if(it == 1){
+                        progressDialog.dismiss()
+                        customDialog.dismiss()
+                        showInfoDialog(
+                            R.color.colorAccent,
+                            R.drawable.ic_done_white_50dp,
+                            getString(R.string.dialog_btn_confirm),
+                            getString(R.string.success_dialog_title),
+                            getString(R.string.success_dialog_message2)
+                        ) //show alert dialog for success
+                    }else{
+                        progressDialog.dismiss()
+                        showInfoDialog(
+                            R.color.dark_red_color,
+                            R.drawable.ic_fail_white_50dp,
+                            getString(R.string.dialog_btn_confirm),
+                            getString(R.string.fail_dialog_title),
+                            getString(R.string.fail_dialog_message)
+                        ) //show alert dialog for fail
+                    }
+                }
+            }
         }
         customDialog.rsd_cancel_btn.setOnClickListener {
             customDialog.dismiss()

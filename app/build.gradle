@@ -75,4 +75,6 @@ dependencies {
     implementation "androidx.room:room-runtime:$rootProject.roomVersion"
     implementation "androidx.room:room-ktx:$rootProject.roomVersion"
     kapt "androidx.room:room-compiler:$rootProject.roomVersion"
+    //Material Intro
+    implementation 'com.github.AppIntro:AppIntro:5.1.0'
 }

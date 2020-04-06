@@ -8,7 +8,7 @@ class RelaysRepository (private val relaysDao: RelaysDao){
 
     val allRelaysData: LiveData<List<RelaysEntity>> = relaysDao.getRelays()
 
-    suspend fun updateRelay(relaysEntity: RelaysEntity){
-        relaysDao.updateRelay(relaysEntity)
+    suspend fun updateRelay(relaysEntity: RelaysEntity) : Int {
+        return relaysDao.updateRelay(relaysEntity)
     }
 }

@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">روبو ریموت</string>
     <string name="left_arrow">left arrow</string>
     <string name="up_arrow">up arrow</string>
@@ -39,4 +39,19 @@
     <string name="single_shot_type">حالت تک تیر</string>
     <string name="multi_shot_type">حالت رگبار</string>
     <string name="switch_type">حالت سوییچ</string>
+    <string name="app_intro_done_button">تایید</string>
+    <string name="into1_title">معرفی نرم افزار</string>
+    <string name="intro1_description">"اپلیکیشن کنترل ربات که از طریق وای فای و با استفاده از کیت "روبو وای فای" امکان کنترل ربات شما را فراهم می سازد.
+        به دنیای رباتیک خوش آمدید!\n"
+    </string>
+    <string name="into2_title">معرفی کیت روبو وای فای</string>
+    <string name="intro2_description">"\nجهت استفاده از این نرم افزار نیازمند کیت کنترل ربات ما هستید.
+این کیت قابلیت کنترل دو موتور با حداکثر جریان 15 آمپر و سه سلاح با حدکثر جریان 10 آمپر را دارد."
+    </string>
+    <string name="into3_title">تهیه برد</string>
+    <string name="intro3_description">جهت کسب اطلاعات بیشتر و یا تهیه برد کافیست با شماره 09373463357 تماس حاصل نمایید.</string>
+    <string name="into4_title">توضیحات تکمیلی</string>
+    <string name="intro4_description">"جهت آشنایی بیشتر با برد و روش استفاده از آن از صفحه تنظیمات گزینه راهنمای استفاده از برد را انتخاب نمایید.میتوانید پاسخ سوالات خود را در قسمت سوالات متداول بیابید.
+گروه آساتیک تولید کننده نرم افزار و سخت افزار الکترونیک و رباتیک\n"
+    </string>
 </resources>

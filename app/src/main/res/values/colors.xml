@@ -13,4 +13,8 @@
     <color name="grey_30">#B2B2B2</color>
     <color name="green_500">#3b9b1b</color>
     <color name="steel_blue">#4682B4</color>
+    <color name="teal_intro">#00BFA6</color>
+    <color name="green_intro">#AFBD21</color>
+    <color name="dark_blue_intro">#5479AB</color>
+    <color name="light_blue_intro">#65C2EC</color>
 </resources>
