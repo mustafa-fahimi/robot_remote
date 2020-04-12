@@ -28,7 +28,7 @@
     <string name="wifi_settings">تنظیمات وای فای</string>
     <string name="relays_settings">تنظیمات رله ها</string>
     <string name="change_wifi_password">تغییر رمز عبور وای فای</string>
-    <string name="share_app">اشتراک برنامه</string>
+    <string name="board_guide">راهنمای برد</string>
     <string name="about_us">درباره سازنده</string>
     <string name="version_number">نسخه 1.0</string>
     <string name="change_wifi_name">تغییر نام وای فای</string>
@@ -55,4 +55,12 @@
         از نرم افزار لذت ببرید.\n"
     </string>
     <string name="saw_intro_key">false</string>
+    <string name="about_us_email">ایمیل: mohsen2766@gmail.com</string>
+    <string name="about_us_number">شماره تماس: 09373463357</string>
+    <string name="about_us_telegram">تلگرام: mohsenfakhrabadi@</string>
+    <string name="about_us_company">گروه الکترونیک و رباتیک آساتیک</string>
+    <string name="about_us_description">ضمن قدردانی و سپاس از انتخاب محصول گروه آساتیک جهت انجام کلیه پروژه های رباتیک ، اپلیکیشن وب و موبایل از طریق پل های ارتباطی زیر با ما ارتباط برقرار نمایید.</string>
+    <string name="about_us_version_number">1.0.0</string>
+    <string name="about_us_version">ورژن</string>
+    <string name="about_us_title">روبو ریموت</string>
 </resources>

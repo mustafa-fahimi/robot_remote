@@ -4,15 +4,12 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.Window
 import android.view.WindowManager
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.neovisionaries.ws.client.*
-import com.ornach.nobobutton.NoboButton
 import com.varunest.sparkbutton.SparkEventListener
 import com.yarolegovich.lovelydialog.LovelyInfoDialog
 import dmax.dialog.SpotsDialog
@@ -48,7 +45,7 @@ class SettingActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_setting)
 
-        Tools.setSystemBarColor(this, R.color.darker_blue) //change the color of system bar
+        Tools.setSystemBarColor(this, R.color.grey_70) //change the color of system bar
         socketCreate() //create socket for first time app start
         handler = CoroutineExceptionHandler { _, _ ->
             showInfoDialog(
@@ -75,6 +72,9 @@ class SettingActivity : AppCompatActivity() {
         }
         sa_relay3_settings_tv.setOnClickListener {
             showRelaySettingsDialog(3)
+        }
+        sa_about_us_btn.setOnClickListener {
+            startActivity(Intent(this, AboutUsActivity::class.java))
         }
 
     }
@@ -402,16 +402,6 @@ class SettingActivity : AppCompatActivity() {
             .apply {
                 show()
             }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        finish()
-    }
-
-    override fun onStop() {
-        super.onStop()
-        finish()
     }
 
     override fun onBackPressed() {

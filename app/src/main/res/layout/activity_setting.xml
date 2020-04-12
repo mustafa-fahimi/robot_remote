@@ -4,7 +4,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".views.SettingActivity">
+    tools:context=".views.SettingActivity"
+    android:background="@color/grey_10">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -231,7 +232,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="?attr/selectableItemBackground"
-                    android:drawableRight="@drawable/ic_share_white_24dp"
+                    android:drawableRight="@drawable/ic_guide_white_24dp"
                     android:drawablePadding="4dp"
                     android:elevation="6dp"
                     android:layout_gravity="center"
@@ -239,7 +240,7 @@
                     android:paddingTop="4dp"
                     android:paddingRight="10dp"
                     android:paddingBottom="4dp"
-                    android:text="@string/share_app"
+                    android:text="@string/board_guide"
                     android:textAllCaps="false"
                     android:textColor="@android:color/white"
                     android:textSize="17sp" />

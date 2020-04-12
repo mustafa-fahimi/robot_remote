@@ -29,6 +29,7 @@ class MainIntroActivity : AppIntro() {
         val sawIntroActivity = sharedPref.getBoolean(getString(R.string.saw_intro_key), false)
         if(sawIntroActivity){
             startActivity(Intent(this, MainActivity::class.java))
+            finish()
         }
 
         with(sliderPage1){
@@ -93,6 +94,16 @@ class MainIntroActivity : AppIntro() {
             "android:switcher:2131231086:3" -> {
                 Tools.setSystemBarColor(this, R.color.dark_blue_intro) //change the color of system bar
             }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        sharedPref = this.getPreferences(Context.MODE_PRIVATE)
+        val sawIntroActivity = sharedPref.getBoolean(getString(R.string.saw_intro_key), false)
+        if(sawIntroActivity){
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
         }
     }
 

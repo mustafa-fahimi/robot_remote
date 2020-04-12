@@ -41,7 +41,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        Tools.setSystemBarColor(this, R.color.steel_blue) //change the color of system bar
+        Tools.setSystemBarColor(this, R.color.grey_10) //change the color of system bar
         socketCreate() //create socket for first time app start
         handler = CoroutineExceptionHandler { _, _ ->
             //change the text and textColor of connection state
@@ -256,7 +256,7 @@ class MainActivity : AppCompatActivity() {
             ma_tv_connectionState.text = getString(R.string.connection_state_problem) //change connection state textView
             ma_tv_connectionState.setTextColor(ContextCompat.getColor(this@MainActivity, R.color.red_color)) //change connection state textView color to red
             relay3State = false //set relay3 state variable to on
-            ma_btn_relay3.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.red_color) //change the background color of relay3 to red
+            ma_btn_relay3.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.dark_blue) //change the background color of relay3 to red
             if (mDialog == null) {
                 //its the first time to showing dialog so we create it here and show
                 mDialog = LovelyInfoDialog(this@MainActivity)
@@ -341,11 +341,11 @@ class MainActivity : AppCompatActivity() {
             when (relayType) {
                 "single" -> {
                     //change the background color of relay to red
-                    relayRelatedBtn.backgroundColor = ContextCompat.getColor(this, R.color.red_color)
+                    relayRelatedBtn.backgroundColor = ContextCompat.getColor(this, R.color.dark_blue)
                 }
                 "multi" -> {
                     //change the background color of relay to green
-                    relayRelatedBtn.backgroundColor = ContextCompat.getColor(this, R.color.red_color)
+                    relayRelatedBtn.backgroundColor = ContextCompat.getColor(this, R.color.dark_blue)
                     //prepare json to send for Esp
                     myJsonObject = JSONObject()
                     myJsonObject.put("token", "MataSecToken")
@@ -357,7 +357,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-    
+
     private fun successResponseFromEsp(){
         when (myJsonObject.getString("relayType")) {
             "single" -> {
@@ -386,7 +386,7 @@ class MainActivity : AppCompatActivity() {
                             //store the voltage that comes from Esp and show it and change the background color of relay1 to green
                             tempVoltage = responseJsonObject.getDouble("voltage")
                             ma_tv_batteryVoltage.text = "ولتاژ باتری موتور: $tempVoltage ولت"
-                            ma_btn_relay1.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.red_color)
+                            ma_btn_relay1.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.dark_blue)
                         }
                     }
                     "relay2" -> {
@@ -403,7 +403,7 @@ class MainActivity : AppCompatActivity() {
                             //store the voltage that comes from Esp and show it and change the background color of relay2 to green
                             tempVoltage = responseJsonObject.getDouble("voltage")
                             ma_tv_batteryVoltage.text = "ولتاژ باتری موتور: $tempVoltage ولت"
-                            ma_btn_relay2.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.red_color)
+                            ma_btn_relay2.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.dark_blue)
                         }
                     }
                     "relay3" -> {
@@ -420,7 +420,7 @@ class MainActivity : AppCompatActivity() {
                             //store the voltage that comes from Esp and show it and change the background color of relay3 to green
                             tempVoltage = responseJsonObject.getDouble("voltage")
                             ma_tv_batteryVoltage.text = "ولتاژ باتری موتور: $tempVoltage ولت"
-                            ma_btn_relay3.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.red_color)
+                            ma_btn_relay3.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.dark_blue)
                         }
                     }
                 }
@@ -429,22 +429,22 @@ class MainActivity : AppCompatActivity() {
         ma_tv_connectionState.text = getString(R.string.connection_state_connected) //change connection state textView
         ma_tv_connectionState.setTextColor(ContextCompat.getColor(this@MainActivity, R.color.colorAccent)) //change connection state textView color
     }
-    
+
     private fun failResponseFromEsp(){
        //change connection state textView color to red
         if (myJsonObject.getString("relayType") == "switch") {
             when(myJsonObject.getString("androidReq")){
                 "relay1" -> {
                     relay1State = false
-                    ma_btn_relay1.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.red_color)
+                    ma_btn_relay1.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.dark_blue)
                 }
                 "relay2" -> {
                     relay2State = false
-                    ma_btn_relay2.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.red_color)
+                    ma_btn_relay2.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.dark_blue)
                 }
                 "relay3" -> {
                     relay3State = false
-                    ma_btn_relay3.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.red_color)
+                    ma_btn_relay3.backgroundColor = ContextCompat.getColor(this@MainActivity, R.color.dark_blue)
                 }
             }
         }
@@ -474,13 +474,11 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         onPaused = false
-        //ma_jsv_joystick.resetButtonPosition()
     }
 
     override fun onRestart() {
         super.onRestart()
         onPaused = false
-        //ma_jsv_joystick.resetButtonPosition()
     }
 
 }
