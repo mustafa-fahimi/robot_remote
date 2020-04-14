@@ -16,7 +16,8 @@
         android:usesCleartextTraffic="true"
         tools:ignore="GoogleAppIndexingWarning"
         tools:replace="android:allowBackup,android:supportsRtl">
-        <activity android:name=".views.AboutUsActivity"></activity>
+        <activity android:name=".views.DescriptionActivity"></activity>
+        <activity android:name=".views.AboutUsActivity" />
         <activity android:name=".views.MainIntroActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

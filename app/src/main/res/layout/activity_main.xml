@@ -5,7 +5,7 @@
     android:id="@+id/ma_root_cl"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white_color"
+    android:background="@color/white"
     tools:context=".views.MainActivity">
 
     <ImageView
@@ -74,66 +74,73 @@
         app:layout_constraintStart_toStartOf="@+id/ma_iv_up"
         app:layout_constraintTop_toBottomOf="@+id/ma_iv_right" />
 
-    <com.ornach.nobobutton.NoboButton
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/ma_btn_relay1"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="12dp"
+        android:background="@android:color/transparent"
+        android:padding="10dp"
+        android:text="@string/one_shot_gun"
+        android:textColor="@color/blue_700"
+        android:textSize="18sp"
+        android:theme="@style/Theme.MaterialComponents"
+        app:icon="@drawable/ic_bullet_32px"
+        app:iconGravity="textEnd"
+        app:iconTint="@color/blue_700"
         app:layout_constraintBottom_toTopOf="@+id/ma_btn_relay2"
         app:layout_constraintEnd_toEndOf="@+id/ma_tv_connectionState"
         app:layout_constraintStart_toStartOf="@+id/ma_tv_connectionState"
         app:layout_constraintTop_toBottomOf="@+id/ma_tv_batteryVoltage"
-        app:nb_backgroundColor="@color/dark_blue"
-        app:nb_borderColor="@color/white_color"
-        app:nb_borderWidth="2dp"
-        app:nb_focusColor="@color/white_color"
-        app:nb_radius="5dp"
-        app:nb_text="@string/one_shot_gun"
-        app:nb_textColor="@color/white_color"
-        app:nb_textSize="18sp" />
+        app:rippleColor="@color/blue_grey_200"
+        app:strokeColor="@color/blue_700" />
 
-    <com.ornach.nobobutton.NoboButton
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/ma_btn_relay2"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="12dp"
+        android:padding="10dp"
+        android:text="@string/rapid_gun"
+        android:textColor="@color/blue_700"
+        android:textSize="18sp"
+        android:theme="@style/Theme.MaterialComponents"
+        app:icon="@drawable/ic_bullets_32px"
+        app:iconGravity="textEnd"
+        app:iconTint="@color/blue_700"
         app:layout_constraintBottom_toTopOf="@+id/ma_btn_relay3"
         app:layout_constraintEnd_toEndOf="@+id/ma_tv_connectionState"
         app:layout_constraintStart_toStartOf="@+id/ma_tv_connectionState"
         app:layout_constraintTop_toBottomOf="@+id/ma_btn_relay1"
-        app:nb_backgroundColor="@color/dark_blue"
-        app:nb_borderColor="@color/white_color"
-        app:nb_borderWidth="2dp"
-        app:nb_focusColor="@color/colorAccent"
-        app:nb_radius="5dp"
-        app:nb_text="@string/rapid_gun"
-        app:nb_textColor="@color/white_color"
-        app:nb_textSize="18sp" />
+        app:rippleColor="@color/blue_grey_200"
+        app:strokeColor="@color/blue_700" />
 
-    <com.ornach.nobobutton.NoboButton
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/ma_btn_relay3"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="12dp"
+        android:padding="10dp"
+        android:text="@string/toggle_gun"
+        android:textColor="@color/blue_700"
+        android:textSize="18sp"
+        android:theme="@style/Theme.MaterialComponents"
+        app:icon="@drawable/ic_gun_32px"
+        app:iconGravity="textEnd"
+        app:iconTint="@color/blue_700"
         app:layout_constraintBottom_toTopOf="@+id/ma_tv_connectionState"
         app:layout_constraintEnd_toEndOf="@+id/ma_tv_connectionState"
         app:layout_constraintStart_toStartOf="@+id/ma_tv_connectionState"
         app:layout_constraintTop_toBottomOf="@+id/ma_btn_relay2"
-        app:nb_backgroundColor="@color/dark_blue"
-        app:nb_borderColor="@color/white_color"
-        app:nb_borderWidth="2dp"
-        app:nb_focusColor="@color/colorAccent"
-        app:nb_radius="5dp"
-        app:nb_text="@string/toggle_gun"
-        app:nb_textColor="@color/white_color"
-        app:nb_textSize="18sp" />
+        app:rippleColor="@color/blue_grey_200"
+        app:strokeColor="@color/blue_700" />
 
     <TextView
         android:id="@+id/ma_tv_connectionState"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/connection_state_unknown"
-        android:textColor="@color/grey_30"
+        android:textColor="@color/grey_300"
         android:textSize="17sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -148,7 +155,7 @@
         android:layout_height="wrap_content"
         android:maxLines="1"
         android:text="@string/battery_voltage"
-        android:textColor="@color/grey_30"
+        android:textColor="@color/grey_300"
         android:textSize="17sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/ma_btn_relay1"

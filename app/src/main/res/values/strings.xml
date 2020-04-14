@@ -1,9 +1,9 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <string name="app_name">روبو ریموت</string>
-    <string name="left_arrow">left arrow</string>
-    <string name="up_arrow">up arrow</string>
-    <string name="right_arrow">right arrow</string>
-    <string name="down_arrow">down arrow</string>
+    <string name="left_arrow">جهت چپ</string>
+    <string name="up_arrow">جهت بالا</string>
+    <string name="right_arrow">جهت راست</string>
+    <string name="down_arrow">جهت پایین</string>
     <string name="connection_state_unknown">وضعیت اتصال: نامعلوم</string>
     <string name="connection_state_connected">وضعیت اتصال: متصل</string>
     <string name="connection_state_problem">وضعیت اتصال: اختلال</string>
@@ -13,7 +13,7 @@
     <string name="new_wifi_name">نام جدید وای فای</string>
     <string name="new_wifi_pass">رمز جدید وای فای</string>
     <string name="new_wifi_pass_again">تکرار رمز جدید وای فای</string>
-    <string name="battery_voltage">ولتاژ موتور: نامعلوم</string>
+    <string name="battery_voltage">ولتاژ باتری موتور: نامعلوم</string>
     <string name="wifi_dialog_title">اتصال وای فای</string>
     <string name="wifi_dialog_message">از متصل بودن وای فای به ماژول اطمینان حاصل نمایید.</string>
     <string name="dialog_btn_confirm">تایید</string>
@@ -40,20 +40,6 @@
     <string name="multi_shot_type">حالت رگبار</string>
     <string name="switch_type">حالت سوییچ</string>
     <string name="app_intro_done_button">تایید</string>
-    <string name="into1_title">معرفی نرم افزار</string>
-    <string name="intro1_description">"اپلیکیشن کنترل ربات که از طریق وای فای و با استفاده از کیت "روبو وای فای" امکان کنترل ربات شما را فراهم می سازد.
-        به دنیای رباتیک خوش آمدید!\n"
-    </string>
-    <string name="into2_title">معرفی برد</string>
-    <string name="intro2_description">جهت استفاده از این نرم افزار نیازمند کیت کنترل ربات ما هستید.
-        این کیت قابلیت کنترل دو موتور با حداکثر جریان 15 آمپر و سه سلاح با حدکثر جریان 10 آمپر را دارد.
-    </string>
-    <string name="into3_title">تهیه برد</string>
-    <string name="intro3_description">جهت کسب اطلاعات بیشتر و یا تهیه برد کافیست با شماره 09373463357 تماس حاصل نمایید.</string>
-    <string name="into4_title">توضیحات تکمیلی</string>
-    <string name="intro4_description">"جهت آشنایی بیشتر با برد و روش استفاده از آن از صفحه تنظیمات گزینه راهنمای استفاده از برد را انتخاب نمایید.
-        از نرم افزار لذت ببرید.\n"
-    </string>
     <string name="saw_intro_key">false</string>
     <string name="about_us_email">ایمیل: mohsen2766@gmail.com</string>
     <string name="about_us_number">شماره تماس: 09373463357</string>
@@ -63,4 +49,21 @@
     <string name="about_us_version_number">1.0.0</string>
     <string name="about_us_version">ورژن</string>
     <string name="about_us_title">روبو ریموت</string>
+    <string name="motor_battery_voltage">"ولتاژ باتری موتور: "</string>
+    <string name="volt">" ولت"</string>
+
+    <string name="intro1_title">معرفی نرم افزار</string>
+    <string name="intro1_description">"اپلیکیشن کنترل ربات که از طریق وای فای و با استفاده از کیت "روبو وای فای" امکان کنترل ربات شما را فراهم می سازد.
+        به دنیای رباتیک خوش آمدید!\n"
+    </string>
+    <string name="intro2_title">معرفی برد</string>
+    <string name="intro2_description">جهت استفاده از این نرم افزار نیازمند کیت کنترل ربات ما هستید.
+        این کیت قابلیت کنترل دو موتور با حداکثر جریان 15 آمپر و سه سلاح با حدکثر جریان 10 آمپر را دارد.
+    </string>
+    <string name="intro3_title">تهیه برد</string>
+    <string name="intro3_description">جهت کسب اطلاعات بیشتر و یا تهیه برد کافیست با شماره 09373463357 تماس حاصل نمایید.</string>
+    <string name="intro4_title">توضیحات تکمیلی</string>
+    <string name="intro4_description">"جهت آشنایی بیشتر با برد و روش استفاده از آن از صفحه تنظیمات گزینه راهنمای استفاده از برد را انتخاب نمایید.
+        از نرم افزار لذت ببرید.\n"
+    </string>
 </resources>

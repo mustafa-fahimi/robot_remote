@@ -10,8 +10,9 @@ import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.neovisionaries.ws.client.*
+import com.rahman.dialog.Activity.SmartDialog
+import com.rahman.dialog.Utilities.SmartDialogBuilder
 import com.varunest.sparkbutton.SparkEventListener
-import com.yarolegovich.lovelydialog.LovelyInfoDialog
 import dmax.dialog.SpotsDialog
 import ir.matarata.robotremote.R
 import ir.matarata.robotremote.models.RelaysEntity
@@ -35,7 +36,7 @@ class SettingActivity : AppCompatActivity() {
     private val socketURL = "ws://192.168.4.1:80" //WebSocket url
     private lateinit var websSocketFactory: WebSocketFactory //WebSocket factory
     private lateinit var progressDialog: AlertDialog //variable to store progress dialog
-    private var mDialog: Dialog? = null //variable to store alert dialog
+    private var mDialog: SmartDialog? = null //variable to store alert dialog
     private lateinit var customDialog: Dialog
     private lateinit var customLayoutParam: WindowManager.LayoutParams
     private var tempRelayType = "None"
@@ -45,12 +46,10 @@ class SettingActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_setting)
 
-        Tools.setSystemBarColor(this, R.color.grey_70) //change the color of system bar
+        Tools.setSystemBarColor(this, R.color.grey_800) //change the color of system bar
         socketCreate() //create socket for first time app start
         handler = CoroutineExceptionHandler { _, _ ->
             showInfoDialog(
-                R.color.dark_red_color,
-                R.drawable.ic_fail_white_50dp,
                 getString(R.string.dialog_btn_save),
                 getString(R.string.fail_dialog_title),
                 getString(R.string.fail_dialog_message)
@@ -123,8 +122,6 @@ class SettingActivity : AppCompatActivity() {
                     progressDialog.dismiss()
                     this.cancel() //cancel the coroutine
                     showInfoDialog(
-                        R.color.red_color,
-                        R.drawable.ic_wifi_white_50dp,
                         getString(R.string.dialog_btn_save),
                         getString(R.string.wifi_dialog_title),
                         getString(R.string.wifi_dialog_message)
@@ -151,8 +148,6 @@ class SettingActivity : AppCompatActivity() {
                     //sa_et_newPassword.text?.clear()
                     //sa_et_newPasswordAgain.text?.clear()
                     showInfoDialog(
-                        R.color.colorAccent,
-                        R.drawable.ic_done_white_50dp,
                         getString(R.string.dialog_btn_confirm),
                         getString(R.string.success_dialog_title),
                         getString(R.string.success_dialog_message)
@@ -161,8 +156,6 @@ class SettingActivity : AppCompatActivity() {
                     //response from Esp is "fail"
                     progressDialog.cancel()
                     showInfoDialog(
-                        R.color.dark_red_color,
-                        R.drawable.ic_fail_white_50dp,
                         getString(R.string.dialog_btn_confirm),
                         getString(R.string.fail_dialog_title),
                         getString(R.string.fail_dialog_message)
@@ -172,8 +165,6 @@ class SettingActivity : AppCompatActivity() {
                 //didn't get a response from Esp
                 progressDialog.cancel()
                 showInfoDialog(
-                    R.color.dark_red_color,
-                    R.drawable.ic_fail_white_50dp,
                     getString(R.string.dialog_btn_confirm),
                     getString(R.string.fail_dialog_title),
                     getString(R.string.fail_dialog_message)
@@ -183,28 +174,34 @@ class SettingActivity : AppCompatActivity() {
     }
 
     //create and show the alert dialog for wifi problem
-    private fun showInfoDialog(topColor: Int, icon: Int, btnText: String, title: String, message: String) {
+    private fun showInfoDialog(btnText: String, title: String, message: String) {
         //create a coroutine in Main thread and append handler to it
         CoroutineScope(Dispatchers.Main + handler).launch {
             if (mDialog == null) {
                 //its the first time to showing dialog so we create it here and show
-                mDialog = LovelyInfoDialog(this@SettingActivity)
-                    .setTopColorRes(topColor)
-                    .setIcon(icon)
-                    .setConfirmButtonText(btnText)
+                mDialog = SmartDialogBuilder(this@SettingActivity)
                     .setTitle(title)
-                    .setMessage(message)
-                    .show()
+                    .setSubTitle(message)
+                    .setCancalable(false)
+                    .setNegativeButtonHide(true) //hide cancel button
+                    .setPositiveButton("تایید") { smartDialog ->
+                        smartDialog.dismiss()
+                        mDialog = null
+                    }.build()
+                mDialog!!.show()
             } else {
-                if (!mDialog!!.isShowing) {
+                if (mDialog!=null) {
                     //there isn't another dialog showing so we show dialog
-                    mDialog = LovelyInfoDialog(this@SettingActivity)
-                        .setTopColorRes(topColor)
-                        .setIcon(icon)
-                        .setConfirmButtonText(btnText)
+                    mDialog = SmartDialogBuilder(this@SettingActivity)
                         .setTitle(title)
-                        .setMessage(message)
-                        .show()
+                        .setSubTitle(message)
+                        .setCancalable(false)
+                        .setNegativeButtonHide(true) //hide cancel button
+                        .setPositiveButton("تایید") { smartDialog ->
+                            smartDialog.dismiss()
+                            mDialog = null
+                        }.build()
+                    mDialog!!.show()
                 }
             }
         }
@@ -366,8 +363,6 @@ class SettingActivity : AppCompatActivity() {
                         progressDialog.dismiss()
                         customDialog.dismiss()
                         showInfoDialog(
-                            R.color.colorAccent,
-                            R.drawable.ic_done_white_50dp,
                             getString(R.string.dialog_btn_confirm),
                             getString(R.string.success_dialog_title),
                             getString(R.string.success_dialog_message2)
@@ -375,8 +370,6 @@ class SettingActivity : AppCompatActivity() {
                     }else{
                         progressDialog.dismiss()
                         showInfoDialog(
-                            R.color.dark_red_color,
-                            R.drawable.ic_fail_white_50dp,
                             getString(R.string.dialog_btn_confirm),
                             getString(R.string.fail_dialog_title),
                             getString(R.string.fail_dialog_message)

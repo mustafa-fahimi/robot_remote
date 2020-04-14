@@ -58,7 +58,8 @@ void sendVoltageToAndroid(String state, float voltage);                         
 void changeWifiName();                                                              //change the wifi name in EEPROM
 void changeWifiPass();                                                              //change the  wifi password in EEPROM
 void readResetBtn();                                                                //read the state of reset button and do factory reset if it is holded 3 second
-void autoSocketDisconnect();                                                        //automatically disconnect the socket if we get no data for 3 second
+void autoSocketDisconnect();
+void handleRelaysRequest(int currentRelay);                                                        //automatically disconnect the socket if we get no data for 3 second
 String getWifiNameEEPROM();                                                         //get wifi access point name from EEPROM
 String getWifiPassEEPROM();                                                         //get wifi access point password from EEPROM
 
@@ -159,6 +160,7 @@ void processJson()
     if (((String)androidReq).equals("motor_left"))
     {
       //request we get from android is "motor_left"
+      sendStateToAndroid("motor_done");
       //change pins state for going left
       digitalWrite(engine1_1, LOW);
       digitalWrite(engine1_2, HIGH);
@@ -168,6 +170,7 @@ void processJson()
     else if (((String)androidReq).equals("motor_right"))
     {
       //request we get from android is "motor_right"
+      sendStateToAndroid("motor_done");
       //change pins state for going right
       digitalWrite(engine1_1, HIGH);
       digitalWrite(engine1_2, LOW);
@@ -177,6 +180,7 @@ void processJson()
     else if (((String)androidReq).equals("motor_forward"))
     {
       //request we get from android is "motor_forward"
+      sendStateToAndroid("motor_done");
       //change pins state for going forward
       digitalWrite(engine1_1, HIGH);
       digitalWrite(engine1_2, LOW);
@@ -186,6 +190,7 @@ void processJson()
     else if (((String)androidReq).equals("motor_backward"))
     {
       //request we get from android is "motor_backward"
+      sendStateToAndroid("motor_done");
       //change pins state for going backward
       digitalWrite(engine1_1, LOW);
       digitalWrite(engine1_2, HIGH);
@@ -197,7 +202,7 @@ void processJson()
       //request we get from android is "motor_off"
       myVoltFloat = ((analogRead(A0) * 3.3) / 1023.0) / 0.12; //calculate voltage with proper formula
       myVoltFloat = roundf(myVoltFloat * 100.0) / 100.0;      //round voltage to float with 2 decimal
-      sendVoltageToAndroid("done", myVoltFloat);              //send response to android via voltage
+      sendVoltageToAndroid("motor_off_done", myVoltFloat);    //send response to android via voltage
       //change pins state for turning off motors
       digitalWrite(engine1_1, LOW);
       digitalWrite(engine1_2, LOW);
@@ -207,106 +212,27 @@ void processJson()
     else if (((String)androidReq).equals("relay1"))
     {
       //request we get from android is "relay1"
-      reqRelayType = jsonDocRecv["relayType"];                //extract state from json document
-      myVoltFloat = ((analogRead(A0) * 3.3) / 1023.0) / 0.12; //calculate voltage with proper formula
-      myVoltFloat = roundf(myVoltFloat * 100.0) / 100.0;      //round voltage to float with 2 decimal
-      if (((String)reqRelayType).equals("single"))
-      {
-        //change pin state of relay1 for 10 millisecond
-        digitalWrite(relay1, HIGH);
-        delay(10);
-        digitalWrite(relay1, LOW);
-        sendVoltageToAndroid("done", myVoltFloat); //send response to android via voltage
-      }
-      else
-      {
-        reqState = jsonDocRecv["state"]; //extract state from json document
-        if (((String)reqState).equals("on"))
-        {
-          //request state from android is turn on
-          digitalWrite(relay1, HIGH);
-          sendVoltageToAndroid("done", myVoltFloat); //send response to android via voltage
-        }
-        else
-        {
-          //request state from android is turn off
-          digitalWrite(relay1, LOW);
-          sendVoltageToAndroid("done", myVoltFloat); //send response to android via voltage
-        }
-      }
+      handleRelaysRequest(relay1);
     }
     else if (((String)androidReq).equals("relay2"))
     {
-      reqRelayType = jsonDocRecv["relayType"];                //extract state from json document
-      myVoltFloat = ((analogRead(A0) * 3.3) / 1023.0) / 0.12; //calculate voltage with proper formula
-      myVoltFloat = roundf(myVoltFloat * 100.0) / 100.0;      //round voltage to float with 2 decimal
-      if (((String)reqRelayType).equals("single"))
-      {
-        //change pin state of relay1 for 10 millisecond
-        digitalWrite(relay2, HIGH);
-        delay(10);
-        digitalWrite(relay2, LOW);
-        sendVoltageToAndroid("done", myVoltFloat); //send response to android via voltage
-      }
-      else
-      {
-        reqState = jsonDocRecv["state"]; //extract state from json document
-        if (((String)reqState).equals("on"))
-        {
-          //request state from android is turn on
-          digitalWrite(relay2, HIGH);
-          sendVoltageToAndroid("done", myVoltFloat); //send response to android via voltage
-        }
-        else
-        {
-          //request state from android is turn off
-          digitalWrite(relay2, LOW);
-          sendVoltageToAndroid("done", myVoltFloat); //send response to android via voltage
-        }
-      }
+      //request we get from android is "relay2"
+      handleRelaysRequest(relay2);
     }
     else if (((String)androidReq).equals("relay3"))
     {
-      //request we get from android is "relay3" relay3 IS NOT HERE
-      reqRelayType = jsonDocRecv["relayType"];                //extract state from json document
-      myVoltFloat = ((analogRead(A0) * 3.3) / 1023.0) / 0.12; //calculate voltage with proper formula
-      myVoltFloat = roundf(myVoltFloat * 100.0) / 100.0;      //round voltage to float with 2 decimal
-      if (((String)reqRelayType).equals("single"))
-      {
-        //change pin state of relay1 for 10 millisecond
-        digitalWrite(relay3, HIGH);
-        delay(10);
-        digitalWrite(relay3, LOW);
-        sendVoltageToAndroid("done", myVoltFloat); //send response to android via voltage
-      }
-      else
-      {
-        reqState = jsonDocRecv["state"]; //extract state from json document
-        if (((String)reqState).equals("on"))
-        {
-          //request state from android is turn on
-          digitalWrite(relay3, HIGH);
-          sendVoltageToAndroid("done", myVoltFloat); //send response to android via voltage
-        }
-        else
-        {
-          //request state from android is turn off
-          digitalWrite(relay3, LOW);
-          sendVoltageToAndroid("done", myVoltFloat); //send response to android via voltage
-        }
-      }
+      //request we get from android is "relay3"
+      handleRelaysRequest(relay3);
     }
     else if (String(androidReq).equals("changeWifiPass"))
     {
       //request we get from android is "change_password"
-      reqNewPass = jsonDocRecv["newWifiPass"]; //extract newPassword from json document
-      changeWifiPass();                        //change wifi access point of Esp in EEPROM and reset Esp
+      changeWifiPass(); //change wifi access point password of Esp in EEPROM and reset Esp
     }
     else if (String(androidReq).equals("changeWifiName"))
     {
       //request we get from android is "change_password"
-      reqNewName = jsonDocRecv["newWifiName"]; //extract newPassword from json document
-      changeWifiName();
+      changeWifiName(); //change wifi access point name of Esp in EEPROM and reset Esp
     }
   }
   else
@@ -335,6 +261,37 @@ void sendVoltageToAndroid(String state, float voltage)
   webSocket.sendTXT(globalSocketNum, dataToSend); //send json to socket client with correct number
 }
 
+void handleRelaysRequest(int currentRelay)
+{
+  reqRelayType = jsonDocRecv["relayType"];                //extract state from json document
+  myVoltFloat = ((analogRead(A0) * 3.3) / 1023.0) / 0.12; //calculate voltage with proper formula
+  myVoltFloat = roundf(myVoltFloat * 100.0) / 100.0;      //round voltage to float with 2 decimal
+  if (((String)reqRelayType).equals("single"))
+  {
+    //change pin state of relay1 for 10 millisecond
+    digitalWrite(currentRelay, HIGH);
+    delay(10);
+    digitalWrite(currentRelay, LOW);
+    sendVoltageToAndroid("done", myVoltFloat); //send response to android via voltage
+  }
+  else
+  {
+    reqState = jsonDocRecv["state"]; //extract state from json document
+    if (((String)reqState).equals("on"))
+    {
+      //request state from android is turn on
+      digitalWrite(currentRelay, HIGH);
+      sendVoltageToAndroid("done", myVoltFloat); //send response to android via voltage
+    }
+    else
+    {
+      //request state from android is turn off
+      digitalWrite(currentRelay, LOW);
+      sendVoltageToAndroid("done", myVoltFloat); //send response to android via voltage
+    }
+  }
+}
+
 void onStationDisconnected(const WiFiEventSoftAPModeStationDisconnected &evt)
 {
   //our only wifi access point client is disconnected so we set all pins to LOW and disconnect the socket
@@ -350,6 +307,7 @@ void onStationDisconnected(const WiFiEventSoftAPModeStationDisconnected &evt)
 
 void changeWifiName()
 {
+  reqNewName = jsonDocRecv["newWifiName"]; //extract newPassword from json document
   reqNewNameLength = strlen(reqNewName);
   EEPROM.write(eepromAmountAddressForWifiName, reqNewNameLength); //write length of new wifi name on EEPROM
   int x = 0;
@@ -374,6 +332,7 @@ void changeWifiName()
 
 void changeWifiPass()
 {
+  reqNewPass = jsonDocRecv["newWifiPass"]; //extract newPassword from json document
   reqNewPassLength = strlen(reqNewPass);
   EEPROM.write(eepromAmountAddressForWifiPass, reqNewPassLength); //write length of new wifi password on EEPROM
   int x = 0;

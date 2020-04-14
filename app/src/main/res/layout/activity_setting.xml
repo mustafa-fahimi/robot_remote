@@ -5,7 +5,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".views.SettingActivity"
-    android:background="@color/grey_10">
+    android:background="@color/grey_5">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -37,7 +37,7 @@
                     android:layout_height="wrap_content"
                     android:padding="12dp"
                     android:text="@string/wifi_settings"
-                    android:textColor="@color/grey_50"
+                    android:textColor="@color/grey_800"
                     android:textSize="13sp" />
 
                 <TextView
@@ -61,7 +61,7 @@
                     android:layout_marginTop="10dp"
                     android:layout_marginRight="16dp"
                     android:layout_marginBottom="10dp"
-                    android:background="@color/grey_30" />
+                    android:background="@color/grey_300" />
 
                 <TextView
                     android:id="@+id/sa_change_wifi_pass_tv"
@@ -107,7 +107,7 @@
                     android:layout_height="wrap_content"
                     android:padding="12dp"
                     android:text="@string/relays_settings"
-                    android:textColor="@color/grey_50"
+                    android:textColor="@color/grey_800"
                     android:textSize="13sp" />
 
                 <TextView
@@ -131,7 +131,7 @@
                     android:layout_marginTop="10dp"
                     android:layout_marginRight="16dp"
                     android:layout_marginBottom="10dp"
-                    android:background="@color/grey_30" />
+                    android:background="@color/grey_300" />
 
                 <TextView
                     android:id="@+id/sa_relay2_settings_tv"
@@ -154,7 +154,7 @@
                     android:layout_marginTop="10dp"
                     android:layout_marginRight="16dp"
                     android:layout_marginBottom="10dp"
-                    android:background="@color/grey_30" />
+                    android:background="@color/grey_300" />
 
                 <TextView
                     android:id="@+id/sa_relay3_settings_tv"
@@ -201,13 +201,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="?attr/selectableItemBackground"
-                    android:drawablePadding="4dp"
                     android:elevation="6dp"
+                    android:gravity="center"
                     android:layout_gravity="center"
-                    android:paddingLeft="10dp"
-                    android:paddingTop="4dp"
-                    android:paddingRight="10dp"
-                    android:paddingBottom="4dp"
                     android:text="@string/about_us"
                     android:textAllCaps="false"
                     android:textColor="@android:color/white"
@@ -223,7 +219,7 @@
                 android:layout_marginRight="17dp"
                 android:layout_marginLeft="3dp"
                 android:layout_weight="1"
-                app:cardBackgroundColor="@color/red_color"
+                app:cardBackgroundColor="@color/red_500"
                 app:cardCornerRadius="20dp"
                 app:cardElevation="4dp">
 
@@ -254,7 +250,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/version_number"
-            android:textColor="@color/grey_30"
+            android:textColor="@color/grey_300"
             android:layout_marginTop="30dp"
             android:layout_marginBottom="10dp"
             app:layout_constraintBottom_toBottomOf="parent"

@@ -11,7 +11,7 @@ class AboutUsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_about_us)
 
-        Tools.setSystemBarColor(this, R.color.about_us_bg) //change the color of system bar
+        Tools.setSystemBarColor(this, R.color.blue_700) //change the color of system bar
     }
 
     override fun onBackPressed() {

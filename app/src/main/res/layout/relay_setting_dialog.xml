@@ -123,12 +123,12 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/rsd_cancel_btn"
         app:nb_backgroundColor="@color/colorAccent"
-        app:nb_borderColor="@color/white_color"
+        app:nb_borderColor="@color/white"
         app:nb_borderWidth="2dp"
-        app:nb_focusColor="@color/grey_30"
+        app:nb_focusColor="@color/grey_300"
         app:nb_radius="10dp"
         app:nb_text="@string/dialog_btn_save"
-        app:nb_textColor="@color/white_color"
+        app:nb_textColor="@color/white"
         app:nb_textSize="20sp" />
 
     <com.ornach.nobobutton.NoboButton
@@ -142,13 +142,13 @@
         app:layout_constraintHorizontal_bias="0.1"
         app:layout_constraintStart_toEndOf="@+id/rsd_save_btn"
         app:layout_constraintTop_toBottomOf="@+id/rsd_switch_btn"
-        app:nb_backgroundColor="@color/red_color"
-        app:nb_borderColor="@color/white_color"
+        app:nb_backgroundColor="@color/red_500"
+        app:nb_borderColor="@color/white"
         app:nb_borderWidth="2dp"
-        app:nb_focusColor="@color/grey_30"
+        app:nb_focusColor="@color/grey_300"
         app:nb_radius="10dp"
         app:nb_text="@string/dialog_btn_cancel"
-        app:nb_textColor="@color/white_color"
+        app:nb_textColor="@color/white"
         app:nb_textSize="20sp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

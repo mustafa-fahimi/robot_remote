@@ -4,8 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.util.Log
-import androidx.annotation.Nullable
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.github.paolorotolo.appintro.AppIntro
@@ -33,28 +31,28 @@ class MainIntroActivity : AppIntro() {
         }
 
         with(sliderPage1){
-            title = getString(R.string.into1_title)
+            title = getString(R.string.intقo1_title)
             description = getString(R.string.intro1_description)
             imageDrawable = R.drawable.app_description_intro
-            bgColor = ContextCompat.getColor(applicationContext, R.color.green_intro)
+            bgColor = ContextCompat.getColor(applicationContext, R.color.lime_intro)
         }
 
         with(sliderPage2){
-            title = getString(R.string.into2_title)
+            title = getString(R.string.intro2_title)
             description = getString(R.string.intro2_description)
             imageDrawable = R.drawable.board_description_intro
             bgColor = ContextCompat.getColor(applicationContext, R.color.teal_intro)
         }
 
         with(sliderPage3){
-            title = getString(R.string.into3_title)
+            title = getString(R.string.intro3_title)
             description = getString(R.string.intro3_description)
             imageDrawable = R.drawable.board_purchase_intro
             bgColor = ContextCompat.getColor(applicationContext, R.color.light_blue_intro)
         }
 
         with(sliderPage4){
-            title = getString(R.string.into4_title)
+            title = getString(R.string.intro4_title)
             description = getString(R.string.intro4_description)
             imageDrawable = R.drawable.more_description_intro
             bgColor = ContextCompat.getColor(applicationContext, R.color.dark_blue_intro)
@@ -83,7 +81,7 @@ class MainIntroActivity : AppIntro() {
         super.onSlideChanged(oldFragment, newFragment)
         when(newFragment?.tag.toString()){
             "android:switcher:2131231086:0" -> {
-                Tools.setSystemBarColor(this, R.color.green_intro) //change the color of system bar
+                Tools.setSystemBarColor(this, R.color.lime_intro) //change the color of system bar
             }
             "android:switcher:2131231086:1" -> {
                 Tools.setSystemBarColor(this, R.color.teal_intro) //change the color of system bar
