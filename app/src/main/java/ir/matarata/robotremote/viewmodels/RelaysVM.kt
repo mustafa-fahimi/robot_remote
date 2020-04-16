@@ -26,7 +26,7 @@ class RelaysVM(application: Application) : AndroidViewModel(application) {
     }
 
     fun updateRelay(relaysEntity: RelaysEntity): Flow<Int> = flow {
-        delay(1500)
+        delay(1000)
         val dbRes = relaysRepository.updateRelay(relaysEntity)
         emit(dbRes)
     }

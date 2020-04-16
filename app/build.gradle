@@ -11,7 +11,7 @@ android {
     buildToolsVersion "29.0.3"
     defaultConfig {
         applicationId "ir.matarata.robotremote"
-        minSdkVersion 17
+        minSdkVersion 16
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
@@ -73,6 +73,8 @@ dependencies {
     kapt "androidx.room:room-compiler:$rootProject.roomVersion"
     //Material Intro
     implementation 'com.github.AppIntro:AppIntro:5.1.0'
-    //SweetAlertDialog
+    //Smart Dialog
     implementation 'com.github.TecOrb-Developers:SmartAlertDialog:v1.0'
+    //Pretty Dialog
+    implementation 'com.github.mjn1369:prettydialog:1.0.4'
 }

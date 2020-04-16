@@ -76,7 +76,7 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/ma_btn_relay1"
-        style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"
@@ -85,9 +85,6 @@
         android:textColor="@color/blue_700"
         android:textSize="18sp"
         android:theme="@style/Theme.MaterialComponents"
-        app:icon="@drawable/ic_bullet_32px"
-        app:iconGravity="textEnd"
-        app:iconTint="@color/blue_700"
         app:layout_constraintBottom_toTopOf="@+id/ma_btn_relay2"
         app:layout_constraintEnd_toEndOf="@+id/ma_tv_connectionState"
         app:layout_constraintStart_toStartOf="@+id/ma_tv_connectionState"
@@ -97,7 +94,7 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/ma_btn_relay2"
-        style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="10dp"
@@ -105,9 +102,6 @@
         android:textColor="@color/blue_700"
         android:textSize="18sp"
         android:theme="@style/Theme.MaterialComponents"
-        app:icon="@drawable/ic_bullets_32px"
-        app:iconGravity="textEnd"
-        app:iconTint="@color/blue_700"
         app:layout_constraintBottom_toTopOf="@+id/ma_btn_relay3"
         app:layout_constraintEnd_toEndOf="@+id/ma_tv_connectionState"
         app:layout_constraintStart_toStartOf="@+id/ma_tv_connectionState"
@@ -117,7 +111,7 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/ma_btn_relay3"
-        style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="10dp"
@@ -125,9 +119,6 @@
         android:textColor="@color/blue_700"
         android:textSize="18sp"
         android:theme="@style/Theme.MaterialComponents"
-        app:icon="@drawable/ic_gun_32px"
-        app:iconGravity="textEnd"
-        app:iconTint="@color/blue_700"
         app:layout_constraintBottom_toTopOf="@+id/ma_tv_connectionState"
         app:layout_constraintEnd_toEndOf="@+id/ma_tv_connectionState"
         app:layout_constraintStart_toStartOf="@+id/ma_tv_connectionState"

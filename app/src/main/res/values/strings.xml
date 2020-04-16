@@ -14,7 +14,7 @@
     <string name="new_wifi_pass">رمز جدید وای فای</string>
     <string name="new_wifi_pass_again">تکرار رمز جدید وای فای</string>
     <string name="battery_voltage">ولتاژ باتری موتور: نامعلوم</string>
-    <string name="wifi_dialog_title">اتصال وای فای</string>
+    <string name="wifi_dialog_title">خطا در اتصال</string>
     <string name="wifi_dialog_message">از متصل بودن وای فای به ماژول اطمینان حاصل نمایید.</string>
     <string name="dialog_btn_confirm">تایید</string>
     <string name="dialog_btn_save">ذخیره</string>
@@ -35,7 +35,7 @@
     <string name="relay1_settings">تنظیمات رله اول</string>
     <string name="relay2_settings">تنظیمات رله دوم</string>
     <string name="relay3_settings">تنظیمات رله سوم</string>
-    <string name="relay_new_name">نام جدید رله</string>
+    <string name="relay_new_name">نام رله</string>
     <string name="single_shot_type">حالت تک تیر</string>
     <string name="multi_shot_type">حالت رگبار</string>
     <string name="switch_type">حالت سوییچ</string>

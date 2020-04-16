@@ -31,7 +31,7 @@ class MainIntroActivity : AppIntro() {
         }
 
         with(sliderPage1){
-            title = getString(R.string.intقo1_title)
+            title = getString(R.string.intro1_title)
             description = getString(R.string.intro1_description)
             imageDrawable = R.drawable.app_description_intro
             bgColor = ContextCompat.getColor(applicationContext, R.color.lime_intro)

@@ -33,10 +33,10 @@ class MainActivity : AppCompatActivity() {
     private val socketURL = "ws://192.168.4.1:80" //WebSocket url
     private lateinit var websSocketFactory: WebSocketFactory //WebSocket factory
     private var tempVoltage: Double = 0.0 //variable to store Esp voltage
-    private var tempVoltageString = ""
+    private var tempVoltageString = "" //variable to store Esp voltage as string
     private var mDialog: SmartDialog? = null //variable to store alert dialog
-    private lateinit var relaysVM: RelaysVM
-    private lateinit var relaysData: List<RelaysEntity>
+    private lateinit var relaysVM: RelaysVM //ViewModel instance
+    private lateinit var relaysData: List<RelaysEntity> //list variable to store all relays data
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,7 +49,7 @@ class MainActivity : AppCompatActivity() {
             ma_tv_connectionState.text = getString(R.string.connection_state_problem)
             ma_tv_connectionState.setTextColor(ContextCompat.getColor(this, R.color.red_500))
         }
-
+        //initiate viewModel object and observe for data
         relaysVM = ViewModelProvider(this).get(RelaysVM::class.java)
         relaysVM.allRelaysData.observe(this, Observer { data ->
             data?.let {
@@ -276,7 +276,7 @@ class MainActivity : AppCompatActivity() {
                 mDialog = SmartDialogBuilder(this@MainActivity)
                     .setTitle(title)
                     .setSubTitle(message)
-                    .setCancalable(false)
+                    .setCancalable(true)
                     .setNegativeButtonHide(true) //hide cancel button
                     .setPositiveButton(btnText) { smartDialog ->
                         smartDialog.dismiss()
@@ -287,6 +287,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    //function for handling relays buttons based on their type and state
     private fun relayButtonPressHandler(currentPressedButton: MaterialButton, relayNumber: String, relayType: String, actionType: String) {
         var currentRelayState = false
         when (relayNumber) {
