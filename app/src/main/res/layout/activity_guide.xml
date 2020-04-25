@@ -1,0 +1,595 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    tools:context=".views.GuideActivity">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="15dp"
+                app:cardCornerRadius="5dp"
+                app:cardElevation="6dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="right"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="15dp"
+                        android:gravity="center_vertical"
+                        android:text="توضیحات کلی"
+                        android:textColor="@color/red_500"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <com.makeramen.roundedimageview.RoundedImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="300dp"
+                        android:layout_gravity="center_horizontal"
+                        android:background="@android:color/transparent"
+                        android:contentDescription="@string/board_guide"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/whole_board"
+                        app:riv_border_color="#333333"
+                        app:riv_border_width="2dp"
+                        app:riv_corner_radius="3dp"
+                        app:riv_mutate_background="true"
+                        app:riv_oval="false"
+                        app:riv_tile_mode="clamp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="15dp"
+                        android:text="این کیت یک کنترل کننده بیسیم ربات بوده که قابلیت کنترل دو موتور با حداکثر جریان 10 آمپر و  سه خروجی مجزا با حداکثر جریان 20 آمپر را دارد. همچنین این برد برای ارتباط از وای فای استفاده می کند و از امنیت بالایی برخوردار می باشد."
+                        android:textSize="17sp" />
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="15dp"
+                app:cardCornerRadius="5dp"
+                app:cardElevation="6dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="right"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="15dp"
+                        android:gravity="center_vertical"
+                        android:text="تغذیه مدار"
+                        android:textColor="@color/red_500"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <com.makeramen.roundedimageview.RoundedImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="300dp"
+                        android:layout_gravity="center_horizontal"
+                        android:background="@android:color/transparent"
+                        android:contentDescription="@string/board_guide"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/board_power"
+                        app:riv_border_color="#333333"
+                        app:riv_border_width="2dp"
+                        app:riv_corner_radius="3dp"
+                        app:riv_mutate_background="true"
+                        app:riv_oval="false"
+                        app:riv_tile_mode="clamp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="15dp"
+                        android:layout_marginRight="15dp"
+                        android:layout_marginBottom="10dp"
+                        android:text="ولتاژ ورودی"
+                        android:textColor="@color/colorAccent"
+                        android:textSize="17sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="15dp"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginBottom="15dp"
+                        android:text="ولتاژ ورودی مدار حداکثر 24 ولت می باشد اما برای کارکرد بهتر مدار بهتر است که ولتاژ 9 ولت به مدار اعمال گردد.
+ورودی تغذیه مدار با Vcc برای مثبت باتری و Gnd برای منفی باتری مشخص شده است که در صورت جابجا زدن با توجه به مدار محافظ مشکلی برای برد ایجاد نخواهد شد و تنها برد روشن نخواهد شد.
+"
+                        android:textSize="17sp" />
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="15dp"
+                app:cardCornerRadius="5dp"
+                app:cardElevation="6dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="right"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="15dp"
+                        android:gravity="center_vertical"
+                        android:text="توضیحات موتور"
+                        android:textColor="@color/red_500"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <com.makeramen.roundedimageview.RoundedImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="300dp"
+                        android:layout_gravity="center_horizontal"
+                        android:background="@android:color/transparent"
+                        android:contentDescription="@string/board_guide"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/board_motors"
+                        app:riv_border_color="#333333"
+                        app:riv_border_width="2dp"
+                        app:riv_corner_radius="3dp"
+                        app:riv_mutate_background="true"
+                        app:riv_oval="false"
+                        app:riv_tile_mode="clamp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="15dp"
+                        android:layout_marginRight="15dp"
+                        android:layout_marginBottom="10dp"
+                        android:text="ورودی ولتاژ موتور"
+                        android:textColor="@color/colorAccent"
+                        android:textSize="17sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="15dp"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginBottom="15dp"
+                        android:text="ولتاژ ورودی موتور بسته به موتورهای انتخابی شما می باشد ومحدودیتی ندارد. تنها لازم به ذکر است که حداکثر جریانی که درایور برد می تواند کنترل کند 10 آمپر می باشد. کانتکتورهای ورودی ولتاژ با V+ برای مثبت ولتاژ ورودی و V- برای منفی ولتاژ ورودی مشخص شده اند که در صورت اتصال درست Led مربوطه روشن می شود."
+                        android:textSize="17sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginRight="15dp"
+                        android:layout_marginBottom="10dp"
+                        android:text="خروجی موتور راست"
+                        android:textColor="@color/colorAccent"
+                        android:textSize="17sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="15dp"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginBottom="15dp"
+                        android:text="موتور راست ربات شما به این کانکتور متصل می گردد. در صورت مشاهده چرخش اشتباه موتور سیم های ورودی به کانکتور را جابجا نمایید."
+                        android:textSize="17sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginRight="15dp"
+                        android:layout_marginBottom="10dp"
+                        android:text="خروجی موتور چپ"
+                        android:textColor="@color/colorAccent"
+                        android:textSize="17sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="15dp"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginBottom="15dp"
+                        android:text="موتور چپ ربات شما به این کانکتور متصل می گردد. در صورت مشاهده چرخش اشتباه موتور سیم های ورودی به کانکتور را جابجا نمایید."
+                        android:textSize="17sp" />
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="15dp"
+                app:cardCornerRadius="5dp"
+                app:cardElevation="6dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="right"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="15dp"
+                        android:gravity="center_vertical"
+                        android:text="توضیحات رله ها"
+                        android:textColor="@color/red_500"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <com.makeramen.roundedimageview.RoundedImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="300dp"
+                        android:layout_gravity="center_horizontal"
+                        android:background="@android:color/transparent"
+                        android:contentDescription="@string/board_guide"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/board_relays"
+                        app:riv_border_color="#333333"
+                        app:riv_border_width="2dp"
+                        app:riv_corner_radius="3dp"
+                        app:riv_mutate_background="true"
+                        app:riv_oval="false"
+                        app:riv_tile_mode="clamp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="15dp"
+                        android:text="@string/relays_description_guide"
+                        android:textSize="17sp" />
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="15dp"
+                app:cardCornerRadius="5dp"
+                app:cardElevation="6dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="right"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="15dp"
+                        android:gravity="center_vertical"
+                        android:text="توضیحات دکمه ریست"
+                        android:textColor="@color/red_500"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <com.makeramen.roundedimageview.RoundedImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="300dp"
+                        android:layout_gravity="center_horizontal"
+                        android:background="@android:color/transparent"
+                        android:contentDescription="@string/board_guide"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/board_reset_btn"
+                        app:riv_border_color="#333333"
+                        app:riv_border_width="2dp"
+                        app:riv_corner_radius="3dp"
+                        app:riv_mutate_background="true"
+                        app:riv_oval="false"
+                        app:riv_tile_mode="clamp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="15dp"
+                        android:text="@string/reset_button_guide"
+                        android:textSize="17sp" />
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="15dp"
+                app:cardCornerRadius="5dp"
+                app:cardElevation="6dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="right"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="15dp"
+                        android:gravity="center_vertical"
+                        android:text="توضیحات کالیبرنمایش میزان ولتاژ باتری موتور"
+                        android:textColor="@color/red_500"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <com.makeramen.roundedimageview.RoundedImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="300dp"
+                        android:layout_gravity="center_horizontal"
+                        android:background="@android:color/transparent"
+                        android:contentDescription="@string/board_guide"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/board_potenciometer"
+                        app:riv_border_color="#333333"
+                        app:riv_border_width="2dp"
+                        app:riv_corner_radius="3dp"
+                        app:riv_mutate_background="true"
+                        app:riv_oval="false"
+                        app:riv_tile_mode="clamp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="15dp"
+                        android:text="@string/potenciometer_guide"
+                        android:textSize="17sp" />
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="15dp"
+                app:cardCornerRadius="5dp"
+                app:cardElevation="6dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="right"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="15dp"
+                        android:gravity="center_vertical"
+                        android:text="پرسش های متداول"
+                        android:textColor="@color/red_500"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <com.makeramen.roundedimageview.RoundedImageView
+                        android:layout_width="match_parent"
+                        android:layout_height="300dp"
+                        android:layout_gravity="center_horizontal"
+                        android:background="@android:color/transparent"
+                        android:contentDescription="@string/board_guide"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/faq_picture"
+                        app:riv_border_color="#333333"
+                        app:riv_border_width="2dp"
+                        app:riv_corner_radius="3dp"
+                        app:riv_mutate_background="true"
+                        app:riv_oval="false"
+                        app:riv_tile_mode="clamp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="15dp"
+                        android:layout_marginRight="15dp"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginBottom="5dp"
+                        android:textColor="@color/colorAccent"
+                        android:text="1-برد روشن نمی شود؟"
+                        android:textSize="17sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginRight="15dp"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginBottom="5dp"
+                        android:text="@string/faq_answer1"
+                        android:textSize="17sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginRight="15dp"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginBottom="5dp"
+                        android:textColor="@color/colorAccent"
+                        android:text="2-برد روشن می شود ولی یکی از موتورها به صورت دائم کار میکند؟"
+                        android:textSize="17sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginRight="15dp"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginBottom="5dp"
+                        android:text="@string/faq_answer2"
+                        android:textSize="17sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginRight="15dp"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginBottom="5dp"
+                        android:textColor="@color/colorAccent"
+                        android:text="3-نام و رمز عبور وای فای فراموش شده است؟"
+                        android:textSize="17sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginRight="15dp"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginBottom="5dp"
+                        android:text="@string/faq_answer3"
+                        android:textSize="17sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginRight="15dp"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginBottom="5dp"
+                        android:textColor="@color/colorAccent"
+                        android:text="4-موتورها روشن نمیشوند؟"
+                        android:textSize="17sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginRight="15dp"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginBottom="5dp"
+                        android:text="@string/faq_answer4"
+                        android:textSize="17sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginRight="15dp"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginBottom="5dp"
+                        android:textColor="@color/colorAccent"
+                        android:text="5-موتورها بسیار ضعیف میچرخند و قدرت کافی ندارند؟"
+                        android:textSize="17sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginRight="15dp"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginBottom="5dp"
+                        android:text="@string/faq_answer5"
+                        android:textSize="17sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginRight="15dp"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginBottom="5dp"
+                        android:textColor="@color/colorAccent"
+                        android:text="6-یکی از موتورها یا هردو برعکس می چرخند؟"
+                        android:textSize="17sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginRight="15dp"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginBottom="5dp"
+                        android:text="@string/faq_answer6"
+                        android:textSize="17sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginRight="15dp"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginBottom="5dp"
+                        android:textColor="@color/colorAccent"
+                        android:text="7-موتورها درست متصل شده اند ولی گردش به راست و چپ معکوس عمل می کند؟"
+                        android:textSize="17sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginRight="15dp"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginBottom="5dp"
+                        android:text="@string/faq_answer7"
+                        android:textSize="17sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginRight="15dp"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginBottom="5dp"
+                        android:textColor="@color/colorAccent"
+                        android:text="8-برد روشن است ولی به وای فای متصل نمی شود؟"
+                        android:textSize="17sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:layout_marginRight="15dp"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginBottom="15dp"
+                        android:text="@string/faq_answer8"
+                        android:textSize="17sp" />
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.core.widget.NestedScrollView>

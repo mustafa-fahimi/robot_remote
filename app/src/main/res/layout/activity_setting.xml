@@ -203,7 +203,7 @@
                 android:textSize="18sp" />
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/sa_share_app_btn"
+                android:id="@+id/sa_guide_btn"
                 style="@style/Widget.MaterialComponents.Button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

@@ -85,6 +85,9 @@ class SettingActivity : AppCompatActivity() {
         sa_about_us_btn.setOnClickListener {
             startActivity(Intent(this, AboutUsActivity::class.java))
         }
+        sa_guide_btn.setOnClickListener{
+            startActivity(Intent(this, GuideActivity::class.java))
+        }
 
     }
 

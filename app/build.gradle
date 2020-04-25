@@ -77,4 +77,8 @@ dependencies {
     implementation 'com.github.TecOrb-Developers:SmartAlertDialog:v1.0'
     //Pretty Dialog
     implementation 'com.github.mjn1369:prettydialog:1.0.4'
+    //Parallax View
+    implementation 'com.ablanco.parallax:parallax:0.1.0'
+    //Rounded ImageView
+    implementation 'com.makeramen:roundedimageview:2.3.0'
 }
